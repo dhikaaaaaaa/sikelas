@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 
 export default function Login() {
-  const { loginWithGoogle } = useAuth()
+  const { loginWithGoogle, loginWithCustomEmail } = useAuth()
   const [error, setError] = useState('')
   
   // Ambil error parameter dari URL jika ada
@@ -26,10 +26,12 @@ export default function Login() {
           </div>
         </div>
 
-        <h1 className="font-display text-xl text-ink-800">Masuk ke akun kampus</h1>
+        <h1 className="font-display text-xl text-ink-850">Masuk ke akun kampus</h1>
         <p className="mt-1 text-sm text-ink-500">
           Gunakan akun Google kampus untuk masuk secara resmi.
         </p>
+
+        {error && <div className="mt-4 rounded-lg bg-rose-50 p-3 text-xs text-rose-600 border border-rose-100">{error}</div>}
 
         {/* Tombol Login Resmi */}
         <button

@@ -41,7 +41,7 @@ export default function App() {
           </>
         )}
 
-        {user.role === 'dosen' && <Route path="/rekap" element={<RekapKehadiran />} />}
+        {(user.role === 'dosen' || user.role === 'admin') && <Route path="/rekap" element={<RekapKehadiran />} />}
 
         {user.role === 'admin' && (
           <>

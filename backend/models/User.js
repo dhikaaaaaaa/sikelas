@@ -32,6 +32,8 @@ const userSchema = new mongoose.Schema(
     // Role-specific fields
     nim: { type: String, default: '' }, // Nomor Induk Mahasiswa
     nip: { type: String, default: '' }, // Nomor Induk Pegawai (Dosen)
+    semester: { type: Number, default: 1 }, // Semester mahasiswa
+    jurusan: { type: String, default: 'Informatika' }, // Program studi/jurusan
     isActive: {
       type: Boolean,
       default: true,

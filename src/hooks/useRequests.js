@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import api from '../api/axios.js'
-import { storage } from '../utils/storage.js'
 
 export function useRequests(endpoint, filterFn) {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
-  const [usingMock, setUsingMock] = useState(false)
+  const [usingMock] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -14,17 +13,12 @@ export function useRequests(endpoint, filterFn) {
       .get(endpoint)
       .then((res) => {
         if (active) {
-          setRequests(res.data.requests || [])
-          setUsingMock(false)
+          const data = res.data.requests || []
+          setRequests(filterFn ? data.filter(filterFn) : data)
         }
       })
-      .catch(() => {
-        if (active) {
-          // Gunakan database localStorage agar interaktif
-          const allReqs = storage.getRequests()
-          setRequests(filterFn ? allReqs.filter(filterFn) : allReqs)
-          setUsingMock(true)
-        }
+      .catch((err) => {
+        console.error('Gagal mengambil data dari server:', err)
       })
       .finally(() => {
         if (active) setLoading(false)
@@ -36,4 +30,3 @@ export function useRequests(endpoint, filterFn) {
 
   return { requests, setRequests, loading, usingMock }
 }
-

@@ -99,7 +99,16 @@ router.get('/permissions/mine', isAuthenticated, isRole('mahasiswa'), async (req
 // GET /api/requests/all — Dosen/Admin lihat semua pengajuan
 router.get('/requests/all', isAuthenticated, isRole('dosen', 'admin'), async (req, res) => {
   try {
-    const requests = await Request.find().sort({ createdAt: -1 });
+    let query = {};
+    
+    // Jika role-nya adalah dosen, batasi hanya untuk kelas yang diajarkannya
+    if (req.user.role === 'dosen') {
+      const myClasses = await Class.find({ lecturerEmail: req.user.email });
+      const myClassIds = myClasses.map(c => c._id);
+      query = { classId: { $in: myClassIds } };
+    }
+
+    const requests = await Request.find(query).sort({ createdAt: -1 });
     res.json({ requests: requests.map(mapRequest) });
   } catch (err) {
     res.status(500).json({ message: err.message });

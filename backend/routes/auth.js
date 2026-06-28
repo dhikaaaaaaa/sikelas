@@ -12,14 +12,18 @@ router.get(
 // GET /api/auth/google/callback — Google mengembalikan data
 router.get(
   '/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: '/?error=not_registered',
-    failureMessage: true,
-  }),
-  (req, res) => {
-    // Login berhasil → redirect ke frontend
-    res.redirect(process.env.CLIENT_URL || '/');
-  },
+  (req, res, next) => {
+    passport.authenticate('google', (err, user, info) => {
+      if (err) { return next(err); }
+      if (!user) {
+        return res.redirect((process.env.CLIENT_URL || 'http://localhost:5173') + '/?error=not_registered');
+      }
+      req.logIn(user, (err) => {
+        if (err) { return next(err); }
+        return res.redirect(process.env.CLIENT_URL || 'http://localhost:5173');
+      });
+    })(req, res, next);
+  }
 );
 
 // GET /api/auth/me — Ambil data user yang sedang login
@@ -34,6 +38,8 @@ router.get('/me', (req, res) => {
         avatar: req.user.avatar,
         nim: req.user.nim,
         nip: req.user.nip,
+        semester: req.user.semester,
+        jurusan: req.user.jurusan,
       },
     });
   }

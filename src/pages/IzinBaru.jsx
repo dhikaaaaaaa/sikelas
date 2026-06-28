@@ -29,9 +29,7 @@ export default function IzinBaru() {
       Object.entries(form).forEach(([key, value]) => data.append(key, value))
       if (file) data.append('attachment', file)
 
-      await api.post('/permissions', data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      await api.post('/permissions', data)
       navigate('/')
     } catch (err) {
       setError(err.message)

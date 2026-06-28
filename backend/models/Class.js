@@ -20,6 +20,14 @@ const classSchema = new mongoose.Schema(
       type: Number,
       default: 30,
     },
+    studentNims: {
+      type: [String],
+      default: [],
+    },
+    semester: {
+      type: Number,
+      default: 1,
+    },
   },
   { timestamps: true },
 );

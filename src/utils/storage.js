@@ -1,16 +1,19 @@
 // Inisialisasi data bawaan jika localStorage masih kosong.
 
 const DEFAULT_USERS = [
-  { id: 'u1', name: 'Naila Putri', email: 'mahasiswa@gmail.com', role: 'mahasiswa', nim: '2310512034' },
+  { id: 'u1', name: 'Naila Putri', email: 'mahasiswa@gmail.com', role: 'mahasiswa', nim: '2310512034', semester: 3, jurusan: 'Teknik Informatika' },
   { id: 'u2', name: 'Dr. Bagus Santoso', email: 'dosen@gmail.com', role: 'dosen', nip: '198203012010121001' },
-  { id: 'u3', name: 'Rangga Putra', email: 'rangga@kampus.ac.id', role: 'mahasiswa', nim: '2310512041' },
-  { id: 'u4', name: 'Dimas Aulia', email: 'dimas@kampus.ac.id', role: 'mahasiswa', nim: '2310512057' },
+  { id: 'u3', name: 'Rangga Putra', email: 'rangga@kampus.ac.id', role: 'mahasiswa', nim: '2310512041', semester: 3, jurusan: 'Sistem Informasi' },
+  { id: 'u4', name: 'Dimas Aulia', email: 'dimas@kampus.ac.id', role: 'mahasiswa', nim: '2310512057', semester: 5, jurusan: 'Teknik Informatika' },
   { id: 'u5', name: 'Admin Akademik', email: 'admin@gmail.com', role: 'admin' },
+  { id: 'u6', name: 'Fadhil Husein', email: 'fadhil.husein@students.paramadina.ac.id', role: 'admin' },
+  { id: 'u7', name: 'Andhika Saputra', email: 'andhika.saputra@students.paramadina.ac.id', role: 'mahasiswa', nim: '2310512099', semester: 3, jurusan: 'Teknik Informatika' },
+  { id: 'u8', name: 'Najjuan Fariz', email: 'najjuan.fariz@students.paramadina.ac.id', role: 'dosen', nip: '199901012025011001' },
 ]
 
 const DEFAULT_CLASSES = [
-  { id: 'cs101', name: 'CS101 — Struktur Data', lecturer: 'Dr. Bagus Santoso', lecturerEmail: 'dosen@gmail.com', students: 32 },
-  { id: 'cs204', name: 'CS204 — Basis Data', lecturer: 'Dr. Bagus Santoso', lecturerEmail: 'dosen@gmail.com', students: 28 },
+  { id: 'cs101', name: 'CS101 — Struktur Data', lecturer: 'Dr. Bagus Santoso', lecturerEmail: 'dosen@gmail.com', students: 32, studentNims: ['2310512034', '2310512057'] },
+  { id: 'cs204', name: 'CS204 — Basis Data', lecturer: 'Najjuan Fariz', lecturerEmail: 'najjuan.fariz@students.paramadina.ac.id', students: 28, studentNims: ['2310512034', '2310512041', '2310512099'] },
 ]
 
 const DEFAULT_REQUESTS = [
@@ -62,6 +65,30 @@ const DEFAULT_REQUESTS = [
     attachmentUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop',
     status: 'escalated',
   },
+  {
+    id: 'r5',
+    type: 'izin',
+    classId: 'cs204',
+    className: 'CS204 — Basis Data',
+    studentName: 'Andhika Saputra',
+    studentEmail: 'andhika.saputra@students.paramadina.ac.id',
+    sessionDate: '2026-07-04',
+    reason: 'Ada urusan keluarga penting di luar kota.',
+    attachmentUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=600&auto=format&fit=crop',
+    status: 'pending',
+  },
+  {
+    id: 'r6',
+    type: 'revisi',
+    classId: 'cs204',
+    className: 'CS204 — Basis Data',
+    studentName: 'Andhika Saputra',
+    studentEmail: 'andhika.saputra@students.paramadina.ac.id',
+    sessionDate: '2026-06-22',
+    reason: 'Terlambat melakukan presensi QR karena kendala jaringan wifi kampus.',
+    attachmentUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop',
+    status: 'approved',
+  },
 ]
 
 // Base attendance stats before any modifications
@@ -69,10 +96,11 @@ const BASE_ATTENDANCE = {
   '2310512034': { name: 'Naila Putri', nim: '2310512034', hadir: 12, izin: 1, sakit: 0, alpa: 2 },
   '2310512041': { name: 'Rangga Putra', nim: '2310512041', hadir: 10, izin: 1, sakit: 2, alpa: 2 },
   '2310512057': { name: 'Dimas Aulia', nim: '2310512057', hadir: 14, izin: 0, sakit: 0, alpa: 1 },
+  '2310512099': { name: 'Andhika Saputra', nim: '2310512099', hadir: 11, izin: 1, sakit: 0, alpa: 2 },
 }
 
 function initData() {
-  const resetKey = 'sikelas_v2_reset';
+  const resetKey = 'sikelas_v5_reset';
   if (!localStorage.getItem(resetKey)) {
     localStorage.removeItem('sikelas_users')
     localStorage.removeItem('sikelas_classes')

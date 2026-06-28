@@ -13,6 +13,7 @@ const NAV_BY_ROLE = {
   ],
   admin: [
     { to: '/', label: 'Eskalasi & Banding' },
+    { to: '/rekap', label: 'Rekap Kehadiran' },
     { to: '/pengguna', label: 'Kelola Pengguna' },
     { to: '/kelas', label: 'Kelola Kelas' },
   ],

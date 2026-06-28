@@ -54,7 +54,7 @@ export default function MahasiswaDashboard() {
         <div>
           <h1 className="font-display text-2xl font-semibold text-ink-850">Halo, {user?.name}</h1>
           <p className="text-sm text-ink-500">
-            NIM: {user?.nim} · Mahasiswa Akademik
+            Selamat datang di portal perizinan dan kehadiran akademik.
           </p>
         </div>
         <div className="flex gap-2">
@@ -67,6 +67,39 @@ export default function MahasiswaDashboard() {
           >
             Ajukan Revisi Kehadiran
           </Link>
+        </div>
+      </div>
+
+      {/* Profil Mahasiswa Premium Card */}
+      <div className="relative overflow-hidden rounded-2xl border border-ink-700 bg-gradient-to-r from-ink-800 to-ink-950 p-6 text-white shadow-md">
+        <div className="absolute right-0 top-0 -mr-6 -mt-6 h-32 w-32 rounded-full bg-white/5 blur-2xl"></div>
+        <div className="absolute left-1/3 bottom-0 -mb-10 h-24 w-24 rounded-full bg-amber-400/10 blur-xl"></div>
+        
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          {/* Avatar / Initials */}
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-amber-400 font-display text-2xl font-bold text-ink-950 shadow-inner">
+            {user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'M'}
+          </div>
+          
+          <div className="space-y-1">
+            <span className="inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
+              Profil Mahasiswa
+            </span>
+            <h2 className="font-display text-xl font-bold tracking-tight text-white">{user?.name}</h2>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-200">
+              <p className="flex items-center gap-1">
+                <span className="font-semibold text-white">NIM:</span> {user?.nim || '-'}
+              </p>
+              <span className="hidden sm:inline text-white/30">•</span>
+              <p className="flex items-center gap-1">
+                <span className="font-semibold text-white">Program Studi / Jurusan:</span> {user?.jurusan || 'Teknik Informatika'}
+              </p>
+              <span className="hidden sm:inline text-white/30">•</span>
+              <p className="flex items-center gap-1">
+                <span className="font-semibold text-white">Semester:</span> {user?.semester || 1}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

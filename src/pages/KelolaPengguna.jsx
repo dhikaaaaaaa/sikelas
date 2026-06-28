@@ -6,7 +6,7 @@ export default function KelolaPengguna() {
   const [showModal, setShowModal] = useState(false)
   
   // State Form Baru
-  const [form, setForm] = useState({ name: '', email: '', role: 'mahasiswa', nim: '', nip: '' })
+  const [form, setForm] = useState({ name: '', email: '', role: 'mahasiswa', nim: '', nip: '', semester: 1, jurusan: 'Teknik Informatika' })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -42,7 +42,11 @@ export default function KelolaPengguna() {
       name: form.name,
       email: form.email,
       role: form.role,
-      ...(form.role === 'mahasiswa' && { nim: form.nim }),
+      ...(form.role === 'mahasiswa' && { 
+        nim: form.nim, 
+        semester: Number(form.semester) || 1, 
+        jurusan: form.jurusan || 'Teknik Informatika' 
+      }),
       ...(form.role === 'dosen' && { nip: form.nip }),
     }
 
@@ -50,7 +54,7 @@ export default function KelolaPengguna() {
       await api.post('/admin/users', payload)
       fetchUsers()
       setShowModal(false)
-      setForm({ name: '', email: '', role: 'mahasiswa', nim: '', nip: '' })
+      setForm({ name: '', email: '', role: 'mahasiswa', nim: '', nip: '', semester: 1, jurusan: 'Teknik Informatika' })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -92,9 +96,14 @@ export default function KelolaPengguna() {
                 <td className="px-5 py-3.5 text-ink-500 font-sans">{u.email}</td>
                 <td className="px-5 py-3.5">
                   {u.role === 'mahasiswa' && (
-                    <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium font-sans">
-                      Mahasiswa (NIM: {u.nim || '-'})
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium font-sans w-fit">
+                        Mahasiswa (NIM: {u.nim || '-'})
+                      </span>
+                      <span className="text-[11px] text-ink-400 font-medium pl-1">
+                        {u.jurusan || 'Teknik Informatika'} · Semester {u.semester || 1}
+                      </span>
+                    </div>
                   )}
                   {u.role === 'dosen' && (
                     <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium font-sans">
@@ -177,17 +186,45 @@ export default function KelolaPengguna() {
               </div>
 
               {form.role === 'mahasiswa' && (
-                <div>
-                  <label className="block text-xs font-semibold text-ink-600 uppercase tracking-wider font-sans">Nomor Induk Mahasiswa (NIM)</label>
-                  <input
-                    required
-                    type="text"
-                    placeholder="23105120xx..."
-                    value={form.nim}
-                    onChange={(e) => handleInputChange('nim', e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-ink-200 px-3 py-2 text-sm text-ink-750 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 outline-hidden transition-all font-sans"
-                  />
-                </div>
+                <>
+                  <div>
+                    <label className="block text-xs font-semibold text-ink-600 uppercase tracking-wider font-sans">Nomor Induk Mahasiswa (NIM)</label>
+                    <input
+                      required
+                      type="text"
+                      placeholder="23105120xx..."
+                      value={form.nim}
+                      onChange={(e) => handleInputChange('nim', e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-ink-200 px-3 py-2 text-sm text-ink-750 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 outline-hidden transition-all font-sans"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-semibold text-ink-600 uppercase tracking-wider font-sans">Semester</label>
+                      <select
+                        value={form.semester}
+                        onChange={(e) => handleInputChange('semester', e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-750 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 outline-hidden transition-all"
+                      >
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+                          <option key={s} value={s}>Semester {s}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-ink-600 uppercase tracking-wider font-sans">Jurusan</label>
+                      <input
+                        required
+                        type="text"
+                        placeholder="Teknik Informatika..."
+                        value={form.jurusan}
+                        onChange={(e) => handleInputChange('jurusan', e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-ink-200 px-3 py-2 text-sm text-ink-750 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 outline-hidden transition-all"
+                      />
+                    </div>
+                  </div>
+                </>
               )}
 
               {form.role === 'dosen' && (

@@ -8,7 +8,6 @@ const { isAuthenticated, isRole } = require('../middleware/auth');
 router.get('/users', isAuthenticated, async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
-    // Map ke format yang diharapkan frontend (id bukan _id)
     const mapped = users.map((u) => ({
       id: u._id,
       name: u.name,
@@ -17,6 +16,8 @@ router.get('/users', isAuthenticated, async (req, res) => {
       nim: u.nim,
       nip: u.nip,
       avatar: u.avatar,
+      semester: u.semester,
+      jurusan: u.jurusan,
     }));
     res.json({ users: mapped });
   } catch (err) {
@@ -27,7 +28,7 @@ router.get('/users', isAuthenticated, async (req, res) => {
 // POST /api/admin/users — Pre-register pengguna baru
 router.post('/users', isAuthenticated, isRole('admin'), async (req, res) => {
   try {
-    const { email, name, role, nim, nip } = req.body;
+    const { email, name, role, nim, nip, semester, jurusan } = req.body;
 
     // Cek duplikat email
     const existing = await User.findOne({ email: email.toLowerCase() });
@@ -41,6 +42,8 @@ router.post('/users', isAuthenticated, isRole('admin'), async (req, res) => {
       role,
       nim: nim || '',
       nip: nip || '',
+      semester: role === 'mahasiswa' ? (Number(semester) || 1) : undefined,
+      jurusan: role === 'mahasiswa' ? (jurusan || 'Informatika') : undefined,
     });
 
     // Jika mahasiswa, buat record attendance awal
@@ -63,6 +66,8 @@ router.post('/users', isAuthenticated, isRole('admin'), async (req, res) => {
         role: user.role,
         nim: user.nim,
         nip: user.nip,
+        semester: user.semester,
+        jurusan: user.jurusan,
       },
     });
   } catch (err) {
@@ -106,6 +111,8 @@ router.get('/classes', isAuthenticated, async (req, res) => {
       lecturer: c.lecturer,
       lecturerEmail: c.lecturerEmail,
       students: c.students,
+      studentNims: c.studentNims || [],
+      semester: c.semester || 1,
     }));
     res.json({ classes: mapped });
   } catch (err) {
@@ -116,12 +123,14 @@ router.get('/classes', isAuthenticated, async (req, res) => {
 // POST /api/admin/classes — Buat kelas baru
 router.post('/classes', isAuthenticated, isRole('admin'), async (req, res) => {
   try {
-    const { name, lecturer, lecturerEmail, students } = req.body;
+    const { name, lecturer, lecturerEmail, students, studentNims, semester } = req.body;
     const classObj = await Class.create({
       name,
       lecturer,
       lecturerEmail: lecturerEmail.toLowerCase(),
       students: Number(students) || 30,
+      studentNims: studentNims || [],
+      semester: Number(semester) || 1,
     });
 
     res.status(201).json({
@@ -131,6 +140,8 @@ router.post('/classes', isAuthenticated, isRole('admin'), async (req, res) => {
         lecturer: classObj.lecturer,
         lecturerEmail: classObj.lecturerEmail,
         students: classObj.students,
+        studentNims: classObj.studentNims,
+        semester: classObj.semester,
       },
     });
   } catch (err) {
