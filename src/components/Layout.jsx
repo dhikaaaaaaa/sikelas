@@ -22,12 +22,6 @@ export default function Layout({ children }) {
   const { user, logout } = useAuth()
   const nav = NAV_BY_ROLE[user?.role] || []
 
-  function handleSwitchRole(role) {
-    // Hapus demo user lama agar memicu inisialisasi demo baru
-    sessionStorage.removeItem('sikelas_demo_user')
-    window.location.href = `/?demo=${role}`
-  }
-
   return (
     <div className="flex min-h-screen">
       {/* Sidebar Navigasi */}
@@ -78,49 +72,6 @@ export default function Layout({ children }) {
 
       {/* Area Konten Utama */}
       <div className="flex-1 flex flex-col bg-ink-50">
-        {/* Banner Simulasi Multi-Peran (Demo Role Switcher) */}
-        <header className="flex items-center justify-between border-b border-ink-100 bg-white px-10 py-3 shadow-xs">
-          <div className="flex items-center gap-2">
-            <span className="inline-block h-2 w-2 rounded-full bg-amber-500 animate-ping"></span>
-            <p className="text-xs font-semibold text-ink-550 uppercase tracking-wider">
-              Simulasi SIKELAS (Tanpa Backend)
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-ink-400 font-medium">Beralih Peran:</span>
-            <button
-              onClick={() => handleSwitchRole('mahasiswa')}
-              className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                user?.role === 'mahasiswa'
-                  ? 'bg-amber-400 text-ink-900 shadow-xs'
-                  : 'bg-ink-50 text-ink-600 hover:bg-ink-100'
-              }`}
-            >
-              Mahasiswa
-            </button>
-            <button
-              onClick={() => handleSwitchRole('dosen')}
-              className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                user?.role === 'dosen'
-                  ? 'bg-amber-400 text-ink-900 shadow-xs'
-                  : 'bg-ink-50 text-ink-600 hover:bg-ink-100'
-              }`}
-            >
-              Dosen
-            </button>
-            <button
-              onClick={() => handleSwitchRole('admin')}
-              className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                user?.role === 'admin'
-                  ? 'bg-amber-400 text-ink-900 shadow-xs'
-                  : 'bg-ink-50 text-ink-600 hover:bg-ink-100'
-              }`}
-            >
-              Admin
-            </button>
-          </div>
-        </header>
-
         {/* Konten Halaman */}
         <main className="flex-1 px-10 py-8 overflow-y-auto">{children}</main>
       </div>
