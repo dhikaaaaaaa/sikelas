@@ -11,6 +11,7 @@ export default function MahasiswaDashboard() {
   const [recap, setRecap] = useState(null)
   const [activeTab, setActiveTab] = useState('semua') // semua, menunggu, diproses
   const [actionBusyId, setActionBusyId] = useState(null)
+  const [lightbox, setLightbox] = useState(null) // { url, title, student }
 
   // Ambil rekap kehadiran mahasiswa yang login
   useEffect(() => {
