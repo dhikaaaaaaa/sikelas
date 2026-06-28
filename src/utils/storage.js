@@ -1,16 +1,16 @@
 // Inisialisasi data bawaan jika localStorage masih kosong.
 
 const DEFAULT_USERS = [
-  { id: 'u1', name: 'Naila Putri', email: 'naila@kampus.ac.id', role: 'mahasiswa', nim: '2310512034' },
-  { id: 'u2', name: 'Dr. Bagus Santoso', email: 'bagus@kampus.ac.id', role: 'dosen', nip: '198203012010121001' },
+  { id: 'u1', name: 'Naila Putri', email: 'mahasiswa@gmail.com', role: 'mahasiswa', nim: '2310512034' },
+  { id: 'u2', name: 'Dr. Bagus Santoso', email: 'dosen@gmail.com', role: 'dosen', nip: '198203012010121001' },
   { id: 'u3', name: 'Rangga Putra', email: 'rangga@kampus.ac.id', role: 'mahasiswa', nim: '2310512041' },
   { id: 'u4', name: 'Dimas Aulia', email: 'dimas@kampus.ac.id', role: 'mahasiswa', nim: '2310512057' },
-  { id: 'u5', name: 'Admin Akademik', email: 'admin@kampus.ac.id', role: 'admin' },
+  { id: 'u5', name: 'Admin Akademik', email: 'admin@gmail.com', role: 'admin' },
 ]
 
 const DEFAULT_CLASSES = [
-  { id: 'cs101', name: 'CS101 — Struktur Data', lecturer: 'Dr. Bagus Santoso', lecturerEmail: 'bagus@kampus.ac.id', students: 32 },
-  { id: 'cs204', name: 'CS204 — Basis Data', lecturer: 'Dr. Bagus Santoso', lecturerEmail: 'bagus@kampus.ac.id', students: 28 },
+  { id: 'cs101', name: 'CS101 — Struktur Data', lecturer: 'Dr. Bagus Santoso', lecturerEmail: 'dosen@gmail.com', students: 32 },
+  { id: 'cs204', name: 'CS204 — Basis Data', lecturer: 'Dr. Bagus Santoso', lecturerEmail: 'dosen@gmail.com', students: 28 },
 ]
 
 const DEFAULT_REQUESTS = [
@@ -20,7 +20,7 @@ const DEFAULT_REQUESTS = [
     classId: 'cs101',
     className: 'CS101 — Struktur Data',
     studentName: 'Naila Putri',
-    studentEmail: 'naila@kampus.ac.id',
+    studentEmail: 'mahasiswa@gmail.com',
     sessionDate: '2026-07-02',
     reason: 'Mengikuti lomba debat tingkat nasional yang diwakilkan oleh kampus.',
     attachmentUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=600&auto=format&fit=crop',
@@ -32,7 +32,7 @@ const DEFAULT_REQUESTS = [
     classId: 'cs204',
     className: 'CS204 — Basis Data',
     studentName: 'Naila Putri',
-    studentEmail: 'naila@kampus.ac.id',
+    studentEmail: 'mahasiswa@gmail.com',
     sessionDate: '2026-06-20',
     reason: 'Sistem mencatat alpa, padahal sudah presensi QR tapi sinyal lambat.',
     attachmentUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop',
@@ -72,6 +72,15 @@ const BASE_ATTENDANCE = {
 }
 
 function initData() {
+  const resetKey = 'sikelas_v2_reset';
+  if (!localStorage.getItem(resetKey)) {
+    localStorage.removeItem('sikelas_users')
+    localStorage.removeItem('sikelas_classes')
+    localStorage.removeItem('sikelas_requests')
+    localStorage.removeItem('sikelas_attendance')
+    localStorage.setItem(resetKey, 'true')
+  }
+
   if (!localStorage.getItem('sikelas_users')) {
     localStorage.setItem('sikelas_users', JSON.stringify(DEFAULT_USERS))
   }

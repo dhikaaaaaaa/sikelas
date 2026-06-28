@@ -65,7 +65,7 @@ api.interceptors.response.use(
             payload = typeof config.data === 'string' ? JSON.parse(config.data) : config.data
           }
           // Cari nama mahasiswa yang sedang login dari sessionStorage
-          const loggedUser = JSON.parse(sessionStorage.getItem('sikelas_demo_user')) || { name: 'Naila Putri', email: 'naila@kampus.ac.id' }
+          const loggedUser = JSON.parse(sessionStorage.getItem('sikelas_demo_user')) || { name: 'Naila Putri', email: 'mahasiswa@gmail.com' }
           const classes = storage.getClasses()
           const matchedClass = classes.find(c => c.id === payload.classId)
 
@@ -90,7 +90,7 @@ api.interceptors.response.use(
           } else {
             payload = typeof config.data === 'string' ? JSON.parse(config.data) : config.data
           }
-          const loggedUser = JSON.parse(sessionStorage.getItem('sikelas_demo_user')) || { name: 'Naila Putri', email: 'naila@kampus.ac.id' }
+          const loggedUser = JSON.parse(sessionStorage.getItem('sikelas_demo_user')) || { name: 'Naila Putri', email: 'mahasiswa@gmail.com' }
           const classes = storage.getClasses()
           const matchedClass = classes.find(c => c.id === payload.classId)
 

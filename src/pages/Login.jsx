@@ -108,11 +108,9 @@ export default function Login() {
                   required
                 />
                 <datalist id="registered-emails">
-                  <option value="naila@kampus.ac.id" />
-                  <option value="bagus@kampus.ac.id" />
-                  <option value="rangga@kampus.ac.id" />
-                  <option value="dimas@kampus.ac.id" />
-                  <option value="admin@kampus.ac.id" />
+                  <option value="mahasiswa@gmail.com" />
+                  <option value="dosen@gmail.com" />
+                  <option value="admin@gmail.com" />
                 </datalist>
               </div>
 
