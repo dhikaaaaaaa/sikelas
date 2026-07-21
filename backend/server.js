@@ -16,6 +16,9 @@ const adminRoutes = require('./routes/admin');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust Vercel's reverse proxy (WAJIB agar cookie secure=true bisa terkirim)
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 connectDB();
 
