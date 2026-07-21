@@ -20,6 +20,7 @@ const PORT = process.env.PORT || 3000;
 connectDB();
 
 // Middleware
+const isProduction = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
@@ -43,8 +44,8 @@ app.use(
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 1 hari
       httpOnly: true,
-      secure: false, // set true di production (HTTPS)
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
     },
   }),
 );
@@ -64,9 +65,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 SIKELAS Backend running on http://localhost:${PORT}`);
-});
+// Start server (hanya di lokal, bukan di Vercel)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 SIKELAS Backend running on http://localhost:${PORT}`);
+  });
+}
 
 module.exports = app;
