@@ -27,23 +27,21 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false))
   }, [])
 
-  function loginWithCustomEmail(email) {
-    // Cari dari localStorage
-    const users = storage.getUsers()
-    let matchedUser = users.find(u => u.email.toLowerCase() === email.trim().toLowerCase())
-
-    if (!matchedUser) {
-      throw new Error('Akun Google ini tidak terdaftar di database SIKELAS. Silakan hubungi Admin.')
+  async function loginWithEmail(email) {
+    try {
+      const res = await api.post('/auth/login', { email })
+      setUser(res.data.user)
+      return res.data.user
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Gagal login'
+      throw new Error(msg)
     }
-
-    setUser(matchedUser)
-    sessionStorage.setItem('sikelas_demo_user', JSON.stringify(matchedUser))
-    return matchedUser
   }
 
   function loginWithGoogle() {
     window.location.href = '/api/auth/google'
   }
+
 
   async function logout() {
     try {
@@ -56,7 +54,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout, loginWithCustomEmail }}>
+    <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout, loginWithEmail }}>
       {children}
     </AuthContext.Provider>
   )

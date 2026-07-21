@@ -7,6 +7,8 @@ export default function IzinBaru() {
   const [classes, setClasses] = useState([])
   const [form, setForm] = useState({ classId: '', sessionDate: '', reason: '' })
   const [file, setFile] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState(null)
+  const [isDragActive, setIsDragActive] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -16,8 +18,39 @@ export default function IzinBaru() {
       .catch(() => {})
   }, [])
 
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl(null)
+      return
+    }
+    if (file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
+      return () => URL.revokeObjectURL(url)
+    }
+  }, [file])
+
   function update(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleDrag = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setIsDragActive(true)
+    } else if (e.type === "dragleave") {
+      setIsDragActive(false)
+    }
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragActive(false)
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0])
+    }
   }
 
   async function handleSubmit(e) {
@@ -92,26 +125,69 @@ export default function IzinBaru() {
 
         <div>
           <label className="block text-sm font-medium text-ink-700">Bukti Pendukung</label>
-          <div className="mt-1.5 flex justify-center rounded-lg border border-dashed border-ink-200 px-6 py-6 transition-all hover:border-amber-400">
-            <div className="text-center space-y-1">
-              <svg className="mx-auto h-8 w-8 text-ink-300" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <div className="flex text-sm text-ink-600">
-                <label className="relative cursor-pointer rounded-md bg-white font-medium text-amber-500 focus-within:outline-hidden hover:text-amber-600">
-                  <span>Pilih file</span>
-                  <input
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={(e) => setFile(e.target.files[0])}
-                    className="sr-only"
-                  />
-                </label>
-                <p className="pl-1">atau seret dan lepas</p>
-              </div>
-              <p className="text-xs text-ink-400">Gambar atau PDF hingga 5MB</p>
-              {file && (
-                <p className="text-xs text-emerald-600 font-medium">Terpilih: {file.name}</p>
+          <div
+            onDragEnter={handleDrag}
+            onDragOver={handleDrag}
+            onDragLeave={handleDrag}
+            onDrop={handleDrop}
+            className={`mt-1.5 flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-all duration-200 ${
+              isDragActive
+                ? 'border-amber-500 bg-amber-50/40 shadow-inner'
+                : file
+                ? 'border-emerald-400 bg-emerald-50/10'
+                : 'border-ink-200 hover:border-amber-400 bg-white'
+            }`}
+          >
+            <div className="text-center space-y-2 w-full flex flex-col items-center">
+              {previewUrl ? (
+                <div className="relative group w-32 h-32 rounded-lg overflow-hidden border border-emerald-200 shadow-md">
+                  <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setFile(null)}
+                      className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700 shadow-md transition-colors"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              ) : file ? (
+                <div className="flex items-center gap-3 bg-emerald-50/50 border border-emerald-200 rounded-xl p-3 w-full max-w-sm">
+                  <svg className="h-8 w-8 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <div className="text-left min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-emerald-800 truncate">{file.name}</p>
+                    <p className="text-[10px] text-emerald-600">{(file.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFile(null)}
+                    className="text-rose-500 hover:text-rose-700 text-xs font-bold px-2 py-1 transition-colors"
+                  >
+                    Batal
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <svg className={`mx-auto h-10 w-10 transition-colors ${isDragActive ? 'text-amber-500 animate-bounce' : 'text-ink-300'}`} stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <div className="flex text-sm text-ink-600 justify-center">
+                    <label className="relative cursor-pointer rounded-md font-semibold text-amber-500 hover:text-amber-600 focus-within:outline-hidden">
+                      <span>Pilih file</span>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={(e) => setFile(e.target.files[0])}
+                        className="sr-only"
+                      />
+                    </label>
+                    <p className="pl-1">atau seret dan lepas di sini</p>
+                  </div>
+                  <p className="text-xs text-ink-400">Gambar atau PDF hingga 5MB</p>
+                </>
               )}
             </div>
           </div>

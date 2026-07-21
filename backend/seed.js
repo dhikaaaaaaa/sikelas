@@ -78,6 +78,14 @@ async function seed() {
         jurusan: 'Teknik Informatika',
       },
       {
+        name: 'Andhika Saputra (Gmail)',
+        email: 'andhika0143@gmail.com',
+        role: 'mahasiswa',
+        nim: '2310512099',
+        semester: 3,
+        jurusan: 'Teknik Informatika',
+      },
+      {
         name: 'Najjuan Fariz',
         email: 'najjuan.fariz@students.paramadina.ac.id',
         role: 'dosen',
