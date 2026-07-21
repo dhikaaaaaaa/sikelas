@@ -1,7 +1,12 @@
 import axios from 'axios'
 
+// Gunakan backend Vercel di production, atau proxy lokal di development
+const BACKEND_URL = import.meta.env.PROD
+  ? 'https://sikelas-lemon.vercel.app/api'
+  : '/api'
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: BACKEND_URL,
   withCredentials: true, // required for session cookie (Google OAuth session)
 })
 

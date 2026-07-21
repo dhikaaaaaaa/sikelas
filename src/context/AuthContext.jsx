@@ -39,7 +39,10 @@ export function AuthProvider({ children }) {
   }
 
   function loginWithGoogle() {
-    window.location.href = '/api/auth/google'
+    const backendBase = import.meta.env.PROD
+      ? 'https://sikelas-lemon.vercel.app'
+      : ''
+    window.location.href = `${backendBase}/api/auth/google`
   }
 
 
