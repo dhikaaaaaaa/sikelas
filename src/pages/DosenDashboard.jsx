@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useRequests } from '../hooks/useRequests.js'
 import RequestCard from '../components/RequestCard.jsx'
-import api from '../api/axios.js'
+import api, { getImageUrl } from '../api/axios.js'
 
 // Komponen grafik rata-rata absensi per semester
 function AbsensiChart({ data }) {
@@ -140,9 +140,10 @@ export default function DosenDashboard() {
     if (!confirm(`Apakah Anda yakin ingin ${decision === 'approve' ? 'menyetujui' : 'menolak'} pengajuan ini?`)) return
     setBusyId(request.id)
     try {
-      await api.post(`/requests/${request.id}/decision`, { decision })
+      const res = await api.post(`/requests/${request.id}/decision`, { decision })
+      const updatedReq = res.data.request
       setRequests((prev) =>
-        prev.map((r) => (r.id === request.id ? { ...r, status: decision === 'approve' ? 'approved' : 'rejected' } : r)),
+        prev.map((r) => (r.id === request.id ? { ...r, status: updatedReq.status } : r)),
       )
     } catch (err) {
       alert('Gagal memproses keputusan: ' + err.message)
@@ -153,9 +154,10 @@ export default function DosenDashboard() {
 
   const myClassIds = myClasses.map(c => c.id)
   const lecturerRequests = requests.filter(r => myClassIds.includes(r.classId))
+  const isDosenPending = (s) => s === 'pending_dosen' || s === 'pending'
   const tabFiltered = lecturerRequests.filter(r => {
-    if (activeTab === 'pending') return r.status === 'pending'
-    return r.status !== 'pending'
+    if (activeTab === 'pending') return isDosenPending(r.status)
+    return !isDosenPending(r.status)
   })
   const finalRequests = tabFiltered.filter(r => {
     const matchClass = selectedClass === 'semua' || r.classId === selectedClass
@@ -230,7 +232,7 @@ export default function DosenDashboard() {
                 : 'border-transparent text-ink-400 hover:text-ink-600'
             }`}
           >
-            Antrean Masuk ({lecturerRequests.filter(r => r.status === 'pending').length})
+            Antrean Masuk ({lecturerRequests.filter(r => isDosenPending(r.status)).length})
           </button>
           <button
             onClick={() => setActiveTab('history')}
@@ -240,7 +242,7 @@ export default function DosenDashboard() {
                 : 'border-transparent text-ink-400 hover:text-ink-600'
             }`}
           >
-            Riwayat Proses ({lecturerRequests.filter(r => r.status !== 'pending').length})
+            Riwayat Proses ({lecturerRequests.filter(r => !isDosenPending(r.status)).length})
           </button>
         </div>
 
@@ -281,14 +283,14 @@ export default function DosenDashboard() {
             request={r}
             onViewAttachment={(url, title, student) => setLightbox({ url, title, student })}
             actions={
-              r.status === 'pending' ? (
+              isDosenPending(r.status) ? (
                 <>
                   <button
                     onClick={() => decide(r, 'approve')}
                     disabled={busyId === r.id}
                     className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 shadow-sm transition-all disabled:opacity-60"
                   >
-                    Setujui
+                    {r.type === 'revisi' ? 'Setujui & Teruskan ke Admin/FIR' : 'Setujui Izin'}
                   </button>
                   <button
                     onClick={() => decide(r, 'reject')}
@@ -321,7 +323,7 @@ export default function DosenDashboard() {
               </div>
               <div className="flex items-center gap-3">
                 <a 
-                  href={lightbox.url} 
+                  href={getImageUrl(lightbox.url)} 
                   download
                   target="_blank"
                   rel="noreferrer"
@@ -347,10 +349,29 @@ export default function DosenDashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
                   <p className="font-medium text-sm">Dokumen PDF Terlampir</p>
-                  <a href={lightbox.url} target="_blank" rel="noreferrer" className="mt-4 rounded-lg bg-ink-800 px-4 py-2 text-xs font-semibold text-white hover:bg-ink-700">Buka PDF di Tab Baru</a>
+                  <a href={getImageUrl(lightbox.url)} target="_blank" rel="noreferrer" className="mt-4 rounded-lg bg-ink-800 px-4 py-2 text-xs font-semibold text-white hover:bg-ink-700">Buka PDF di Tab Baru</a>
                 </div>
               ) : (
-                <img src={lightbox.url} alt="Bukti Lampiran" className="object-contain max-h-[60vh] rounded-lg shadow-sm" />
+                <img 
+                  src={getImageUrl(lightbox.url)} 
+                  alt="Bukti Lampiran" 
+                  className="object-contain max-h-[60vh] rounded-lg shadow-sm"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                    const parent = e.target.parentNode;
+                    const fallbackDiv = document.createElement('div');
+                    fallbackDiv.className = 'p-12 text-center text-ink-500 flex flex-col items-center justify-center';
+                    fallbackDiv.innerHTML = `
+                      <svg class="h-12 w-12 text-ink-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <p class="text-sm font-medium">Gambar Bukti Terlampir</p>
+                      <a href="${getImageUrl(lightbox.url)}" target="_blank" class="mt-4 text-xs font-semibold text-amber-500 underline">Unduh/Lihat berkas bukti</a>
+                    `;
+                    parent.appendChild(fallbackDiv);
+                  }}
+                />
               )}
             </div>
           </div>

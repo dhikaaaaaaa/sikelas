@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useRequests } from '../hooks/useRequests.js'
 import RequestCard from '../components/RequestCard.jsx'
-import api from '../api/axios.js'
+import api, { getImageUrl } from '../api/axios.js'
 
 export default function MahasiswaDashboard() {
   const { user } = useAuth()
@@ -25,16 +25,17 @@ export default function MahasiswaDashboard() {
       })
   }, [requests, user])
 
-  const pendingCount = requests.filter((r) => r.status === 'pending').length
+  const isPending = (status) => ['pending', 'pending_admin', 'pending_dosen'].includes(status)
+  const pendingCount = requests.filter((r) => isPending(r.status)).length
 
   const filteredRequests = requests.filter(r => {
-    if (activeTab === 'menunggu') return r.status === 'pending'
-    if (activeTab === 'diproses') return r.status !== 'pending'
+    if (activeTab === 'menunggu') return isPending(r.status)
+    if (activeTab === 'diproses') return !isPending(r.status)
     return true
   })
 
   async function handleEscalate(requestId) {
-    if (!confirm('Apakah Anda yakin ingin mengajukan banding ke Admin untuk keputusan dosen ini?')) return
+    if (!confirm('Apakah Anda yakin ingin mengajukan banding ke Admin untuk keputusan penolakan ini?')) return
     
     setActionBusyId(requestId)
     try {
@@ -169,13 +170,13 @@ export default function MahasiswaDashboard() {
               request={r}
               onViewAttachment={(url, title, student) => setLightbox({ url, title, student })}
               actions={
-                r.status === 'rejected' ? (
+                ['rejected', 'rejected_by_dosen'].includes(r.status) ? (
                   <button
                     onClick={() => handleEscalate(r.id)}
                     disabled={actionBusyId === r.id}
                     className="rounded-lg bg-amber-400 px-4 py-2 text-xs font-semibold text-ink-900 shadow-xs hover:bg-amber-300 transition-all disabled:opacity-60"
                   >
-                    {actionBusyId === r.id ? 'Mengirim...' : 'Ajukan Banding ke Admin'}
+                    {actionBusyId === r.id ? 'Mengirim...' : 'Ajukan Banding ke Admin/FIR'}
                   </button>
                 ) : null
               }
@@ -201,7 +202,7 @@ export default function MahasiswaDashboard() {
               </div>
               <div className="flex items-center gap-3">
                 <a 
-                  href={lightbox.url} 
+                  href={getImageUrl(lightbox.url)} 
                   download
                   target="_blank"
                   rel="noreferrer"
@@ -228,7 +229,7 @@ export default function MahasiswaDashboard() {
                   </svg>
                   <p className="font-medium text-sm">Dokumen PDF Terlampir</p>
                   <a 
-                    href={lightbox.url} 
+                    href={getImageUrl(lightbox.url)} 
                     target="_blank" 
                     rel="noreferrer"
                     className="mt-4 rounded-lg bg-ink-800 px-4 py-2 text-xs font-semibold text-white hover:bg-ink-700"
@@ -238,7 +239,7 @@ export default function MahasiswaDashboard() {
                 </div>
               ) : (
                 <img 
-                  src={lightbox.url} 
+                  src={getImageUrl(lightbox.url)} 
                   alt="Bukti Lampiran" 
                   className="object-contain max-h-[60vh] rounded-lg shadow-sm"
                   onError={(e) => {
@@ -252,7 +253,7 @@ export default function MahasiswaDashboard() {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       <p class="text-sm font-medium">Gambar Bukti Terlampir</p>
-                      <a href="${lightbox.url}" target="_blank" class="mt-4 text-xs font-semibold text-amber-500 underline">Unduh/Lihat berkas bukti</a>
+                      <a href="${getImageUrl(lightbox.url)}" target="_blank" class="mt-4 text-xs font-semibold text-amber-500 underline">Unduh/Lihat berkas bukti</a>
                     `;
                     parent.appendChild(fallbackDiv);
                   }}

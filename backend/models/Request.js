@@ -49,8 +49,8 @@ const requestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'rejected', 'escalated'],
-      default: 'pending',
+      enum: ['pending_admin', 'pending_dosen', 'approved', 'rejected', 'rejected_by_admin', 'rejected_by_dosen', 'escalated'],
+      default: 'pending_admin',
     },
   },
   { timestamps: true },

@@ -81,7 +81,7 @@ export default function IzinBaru() {
 
       <h1 className="font-display text-2xl font-semibold text-ink-800">Ajukan Izin Kelas</h1>
       <p className="mt-1 text-sm text-ink-500">
-        Isi formulir berikut sebelum sesi kelas berlangsung. Dosen terkait akan menerima notifikasi peninjauan.
+        Isi formulir berikut sebelum sesi kelas berlangsung. Pengajuan akan ditinjau oleh Admin/FIR Paramadina terlebih dahulu, lalu diteruskan ke Dosen terkait.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-5 rounded-2xl border border-ink-100 bg-white p-6 shadow-sm">

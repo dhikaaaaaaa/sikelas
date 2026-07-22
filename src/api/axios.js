@@ -1,9 +1,11 @@
 import axios from 'axios'
 
 // Gunakan backend Vercel di production, atau proxy lokal di development
-const BACKEND_URL = import.meta.env.PROD
-  ? 'https://sikelas-lemon.vercel.app/api'
-  : '/api'
+export const BASE_URL = import.meta.env.PROD
+  ? 'https://sikelas-lemon.vercel.app'
+  : 'http://localhost:3000'
+
+const BACKEND_URL = `${BASE_URL}/api`
 
 const api = axios.create({
   baseURL: BACKEND_URL,
@@ -18,5 +20,11 @@ api.interceptors.response.use(
     return Promise.reject(new Error(message))
   }
 )
+
+export const getImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `${BASE_URL}${url}`;
+}
 
 export default api

@@ -5,7 +5,8 @@ const Attendance = require('../models/Attendance');
 const { isAuthenticated, isRole } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
-// POST /api/permissions — Mahasiswa ajukan izin kelas
+// ─── POST /api/permissions — Mahasiswa ajukan izin kelas ───
+// Alur: Mahasiswa → Admin/FIR (pending_admin) → Dosen (pending_dosen) → Selesai
 router.post(
   '/permissions',
   isAuthenticated,
@@ -31,6 +32,7 @@ router.post(
         sessionDate,
         reason,
         attachmentUrl,
+        status: 'pending_admin', // Izin masuk ke Admin/FIR dulu
       });
 
       const response = request.toObject();
@@ -42,7 +44,8 @@ router.post(
   },
 );
 
-// POST /api/attendance-revisions — Mahasiswa ajukan revisi kehadiran
+// ─── POST /api/attendance-revisions — Mahasiswa ajukan revisi kehadiran ───
+// Alur: Mahasiswa → Dosen (pending_dosen) → Admin/FIR (pending_admin) → Selesai
 router.post(
   '/attendance-revisions',
   isAuthenticated,
@@ -69,6 +72,7 @@ router.post(
         currentStatus: currentStatus || 'alpa',
         reason,
         attachmentUrl,
+        status: 'pending_dosen', // Revisi masuk ke Dosen dulu
       });
 
       const revResponse = request.toObject();
@@ -86,7 +90,7 @@ function mapRequest(r) {
   return { ...obj, id: obj._id };
 }
 
-// GET /api/permissions/mine — Mahasiswa lihat pengajuan sendiri
+// ─── GET /api/permissions/mine — Mahasiswa lihat pengajuan sendiri ───
 router.get('/permissions/mine', isAuthenticated, isRole('mahasiswa'), async (req, res) => {
   try {
     const requests = await Request.find({ mahasiswa: req.user._id }).sort({ createdAt: -1 });
@@ -96,17 +100,21 @@ router.get('/permissions/mine', isAuthenticated, isRole('mahasiswa'), async (req
   }
 });
 
-// GET /api/requests/all — Dosen/Admin lihat semua pengajuan
+// ─── GET /api/requests/all — Dosen/Admin lihat pengajuan sesuai peran ───
 router.get('/requests/all', isAuthenticated, isRole('dosen', 'admin'), async (req, res) => {
   try {
     let query = {};
-    
-    // Jika role-nya adalah dosen, batasi hanya untuk kelas yang diajarkannya
+
     if (req.user.role === 'dosen') {
+      // Dosen melihat:
+      // 1. Izin yang sudah di-approve admin (pending_dosen) + izin yang sudah dosen proses
+      // 2. Revisi langsung dari mahasiswa (pending_dosen) + revisi yang sudah dosen proses
+      // Semua harus dari kelas yang diampu
       const myClasses = await Class.find({ lecturerEmail: req.user.email });
       const myClassIds = myClasses.map(c => c._id);
       query = { classId: { $in: myClassIds } };
     }
+    // Admin melihat semua request (tanpa filter kelas)
 
     const requests = await Request.find(query).sort({ createdAt: -1 });
     res.json({ requests: requests.map(mapRequest) });
@@ -115,72 +123,103 @@ router.get('/requests/all', isAuthenticated, isRole('dosen', 'admin'), async (re
   }
 });
 
-// POST /api/requests/:id/decision — Dosen approve/reject
+// ─── POST /api/requests/:id/decision — Dosen approve/reject ───
 router.post('/requests/:id/decision', isAuthenticated, isRole('dosen'), async (req, res) => {
   try {
     const { decision } = req.body;
-    const status = decision === 'approve' ? 'approved' : 'rejected';
-
-    const request = await Request.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    const request = await Request.findById(req.params.id);
 
     if (!request) {
       return res.status(404).json({ message: 'Pengajuan tidak ditemukan.' });
     }
 
-    // Jika disetujui, update rekap kehadiran
-    if (status === 'approved') {
+    let newStatus;
+
+    if (request.type === 'izin') {
+      // Izin: Dosen adalah tahap akhir (setelah admin approve)
+      newStatus = decision === 'approve' ? 'approved' : 'rejected';
+    } else if (request.type === 'revisi') {
+      // Revisi: Dosen approve → lanjut ke Admin/FIR, Dosen reject → rejected_by_dosen
+      newStatus = decision === 'approve' ? 'pending_admin' : 'rejected_by_dosen';
+    }
+
+    request.status = newStatus;
+    await request.save();
+
+    // Jika status final approved (izin disetujui dosen), update kehadiran
+    if (newStatus === 'approved') {
       await updateAttendance(request);
     }
 
-    res.json({ request });
+    res.json({ request: mapRequest(request) });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// POST /api/requests/:id/admin-decision — Admin keputusan final (banding)
+// ─── POST /api/requests/:id/admin-decision — Admin/FIR keputusan ───
 router.post('/requests/:id/admin-decision', isAuthenticated, isRole('admin'), async (req, res) => {
   try {
     const { decision } = req.body;
-    const status = decision === 'approve' ? 'approved' : 'rejected';
-
-    const request = await Request.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    const request = await Request.findById(req.params.id);
 
     if (!request) {
       return res.status(404).json({ message: 'Pengajuan tidak ditemukan.' });
     }
 
-    // Jika disetujui, update rekap kehadiran
-    if (status === 'approved') {
+    let newStatus;
+
+    if (request.status === 'escalated') {
+      // Banding/eskalasi: keputusan final admin
+      newStatus = decision === 'approve' ? 'approved' : 'rejected';
+    } else if (request.type === 'izin' && request.status === 'pending_admin') {
+      // Izin tahap 1: Admin approve → lanjut ke Dosen, Admin reject → rejected_by_admin
+      newStatus = decision === 'approve' ? 'pending_dosen' : 'rejected_by_admin';
+    } else if (request.type === 'revisi' && request.status === 'pending_admin') {
+      // Revisi tahap 2: Admin adalah tahap akhir
+      newStatus = decision === 'approve' ? 'approved' : 'rejected';
+    } else {
+      return res.status(400).json({ message: 'Pengajuan ini tidak bisa diproses oleh admin saat ini.' });
+    }
+
+    request.status = newStatus;
+    await request.save();
+
+    // Jika status final approved, update kehadiran
+    if (newStatus === 'approved') {
       await updateAttendance(request);
     }
 
-    res.json({ request });
+    res.json({ request: mapRequest(request) });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// POST /api/requests/:id/escalate — Mahasiswa eskalasi ke admin
+// ─── POST /api/requests/:id/escalate — Mahasiswa eskalasi ke admin ───
 router.post('/requests/:id/escalate', isAuthenticated, isRole('mahasiswa'), async (req, res) => {
   try {
-    const request = await Request.findByIdAndUpdate(
-      req.params.id,
-      { status: 'escalated' },
-      { new: true },
-    );
+    const request = await Request.findById(req.params.id);
 
     if (!request) {
       return res.status(404).json({ message: 'Pengajuan tidak ditemukan.' });
     }
 
-    res.json({ request });
+    // Bisa banding dari rejected (dosen tolak izin) atau rejected_by_dosen (dosen tolak revisi)
+    if (!['rejected', 'rejected_by_dosen'].includes(request.status)) {
+      return res.status(400).json({ message: 'Hanya pengajuan yang ditolak yang bisa diajukan banding.' });
+    }
+
+    request.status = 'escalated';
+    await request.save();
+
+    res.json({ request: mapRequest(request) });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Helper: Update rekap kehadiran setelah pengajuan disetujui
+// ─── Helper: Update rekap kehadiran setelah pengajuan disetujui ───
 async function updateAttendance(request) {
   try {
     const User = require('../models/User');

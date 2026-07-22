@@ -81,7 +81,7 @@ export default function RevisiBaru() {
 
       <h1 className="font-display text-2xl font-semibold text-ink-800">Ajukan Revisi Kehadiran</h1>
       <p className="mt-1 text-sm text-ink-500">
-        Gunakan form ini jika status kehadiran Anda di sistem tidak sesuai dengan kondisi sebenarnya (misal: tercatat alpa padahal hadir).
+        Gunakan form ini jika status kehadiran Anda di sistem tidak sesuai. Pengajuan akan ditinjau oleh Dosen terlebih dahulu, lalu diteruskan ke Admin/FIR Paramadina untuk verifikasi akhir.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-5 rounded-2xl border border-ink-100 bg-white p-6 shadow-sm">

@@ -12,7 +12,7 @@ const NAV_BY_ROLE = {
     { to: '/rekap', label: 'Rekap Kehadiran' },
   ],
   admin: [
-    { to: '/', label: 'Eskalasi & Banding' },
+    { to: '/', label: 'Dashboard Admin (FIR)' },
     { to: '/rekap', label: 'Rekap Kehadiran' },
     { to: '/pengguna', label: 'Kelola Pengguna' },
     { to: '/kelas', label: 'Kelola Kelas' },
