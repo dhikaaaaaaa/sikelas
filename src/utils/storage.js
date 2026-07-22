@@ -16,7 +16,7 @@ const DEFAULT_CLASSES = [
   { id: 'cs204', name: 'CS204 — Basis Data', lecturer: 'Najjuan Fariz', lecturerEmail: 'najjuan.fariz@students.paramadina.ac.id', students: 28, studentNims: ['2310512034', '2310512041', '2310512099'] },
 ]
 
-const SAMPLE_PROOF = 'https://res.cloudinary.com/ghbqwu6e/image/upload/v1784719020/sikelas_proofs/u7g5exzkvzar5y87xdcr.png';
+const SAMPLE_PROOF = 'https://res.cloudinary.com/ghbqwu6e/image/upload/v1784720561/sikelas/default_proof.png';
 
 const DEFAULT_REQUESTS = [
   {

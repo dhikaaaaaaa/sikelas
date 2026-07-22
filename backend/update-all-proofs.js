@@ -1,7 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-const DEFAULT_PROOF = 'https://res.cloudinary.com/ghbqwu6e/image/upload/v1784719020/sikelas_proofs/u7g5exzkvzar5y87xdcr.png';
+const DEFAULT_PROOF = 'https://res.cloudinary.com/ghbqwu6e/image/upload/v1784720561/sikelas/default_proof.png';
 
 async function main() {
   await mongoose.connect(process.env.MONGODB_URI);
