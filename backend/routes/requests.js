@@ -20,7 +20,9 @@ router.post(
         return res.status(404).json({ message: 'Kelas tidak ditemukan.' });
       }
 
-      const attachmentUrl = req.file ? `/uploads/${req.file.filename}` : '';
+      const attachmentUrl = req.file
+        ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
+        : '';
 
       const request = await Request.create({
         type: 'izin',
@@ -59,7 +61,9 @@ router.post(
         return res.status(404).json({ message: 'Kelas tidak ditemukan.' });
       }
 
-      const attachmentUrl = req.file ? `/uploads/${req.file.filename}` : '';
+      const attachmentUrl = req.file
+        ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
+        : '';
 
       const request = await Request.create({
         type: 'revisi',
