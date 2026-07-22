@@ -1,3 +1,4 @@
+const router = require('express').Router();
 const Request = require('../models/Request');
 const Class = require('../models/Class');
 const Attendance = require('../models/Attendance');

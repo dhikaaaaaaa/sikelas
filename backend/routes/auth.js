@@ -48,12 +48,16 @@ router.get('/users', async (req, res) => {
 });
 
 // GET /api/auth/google — Mulai Google OAuth flow
-router.get(
-  '/google',
+router.get('/google', (req, res, next) => {
+  const clientID = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  if (!clientID || !clientSecret || clientID === 'your_google_client_id_here') {
+    return res.redirect((process.env.CLIENT_URL || 'http://localhost:5173') + '/?error=oauth_not_configured');
+  }
   passport.authenticate('google', {
     scope: ['profile', 'email'],
-  }),
-);
+  })(req, res, next);
+});
 
 // GET /api/auth/google/callback — Google mengembalikan data
 router.get(

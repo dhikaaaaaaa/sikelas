@@ -12,6 +12,9 @@ export default function Login() {
     const params = new URLSearchParams(window.location.search)
     if (params.get('error') === 'not_registered') {
       setError('Email Google Anda belum didaftarkan oleh admin. Silakan hubungi Fakultas.')
+    } else if (params.get('error') === 'oauth_not_configured') {
+      setError('Google OAuth Client ID belum dikonfigurasi di backend/.env. Silakan gunakan fitur Login Manual (Bypass OAuth) di bawah ini.')
+      setShowBypass(true)
     }
   }, [])
 
