@@ -137,7 +137,17 @@ export default function DosenDashboard() {
   }, [])
 
   async function decide(request, decision) {
-    if (!confirm(`Apakah Anda yakin ingin ${decision === 'approve' ? 'menyetujui' : 'menolak'} pengajuan ini?`)) return
+    let confirmMsg = 'Apakah Anda yakin?'
+    if (request.type === 'izin') {
+      confirmMsg = decision === 'approve'
+        ? 'Apakah Anda yakin ingin MENYETUJUI izin kelas ini? (Keputusan final)'
+        : 'Apakah Anda yakin ingin MENOLAK izin kelas ini? Mahasiswa bisa mengajukan banding ke Admin.'
+    } else if (request.type === 'revisi') {
+      confirmMsg = decision === 'approve'
+        ? 'Apakah Anda yakin ingin MENYETUJUI revisi ini? Pengajuan akan diteruskan ke Admin/FIR untuk verifikasi akhir.'
+        : 'Apakah Anda yakin ingin MENOLAK revisi ini? Mahasiswa bisa mengajukan banding ke Admin.'
+    }
+    if (!confirm(confirmMsg)) return
     setBusyId(request.id)
     try {
       const res = await api.post(`/requests/${request.id}/decision`, { decision })

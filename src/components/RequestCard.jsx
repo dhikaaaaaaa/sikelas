@@ -5,7 +5,22 @@ const TYPE_LABEL = {
   revisi: 'Revisi kehadiran',
 }
 
+// Flow info berdasarkan tipe dan status
+function getFlowInfo(type, status) {
+  if (type === 'izin') {
+    if (status === 'pending_admin') return { step: 1, total: 2, label: 'Verifikasi Admin/FIR', next: 'Dosen' }
+    if (status === 'pending_dosen') return { step: 2, total: 2, label: 'Keputusan Dosen', next: null }
+  } else if (type === 'revisi') {
+    if (status === 'pending_dosen') return { step: 1, total: 2, label: 'Persetujuan Dosen', next: 'Admin/FIR' }
+    if (status === 'pending_admin') return { step: 2, total: 2, label: 'Verifikasi Final Admin/FIR', next: null }
+  }
+  if (status === 'escalated') return { step: 0, total: 0, label: 'Banding ke Admin/FIR', next: null }
+  return null
+}
+
 export default function RequestCard({ request, actions, onViewAttachment }) {
+  const flow = getFlowInfo(request.type, request.status)
+
   return (
     <div className="rounded-xl border border-ink-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
       <div className="flex items-start justify-between gap-4">
@@ -20,6 +35,21 @@ export default function RequestCard({ request, actions, onViewAttachment }) {
         </div>
         <StatusBadge status={request.status} />
       </div>
+
+      {/* Flow step indicator */}
+      {flow && (
+        <div className="mt-2 flex items-center gap-2 text-xs text-ink-500">
+          <span className="inline-flex items-center gap-1 rounded-md bg-ink-50 border border-ink-100 px-2 py-0.5 font-medium">
+            <svg className="h-3 w-3 text-ink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+            Tahap {flow.step}/{flow.total}: {flow.label}
+          </span>
+          {flow.next && (
+            <span className="text-ink-400">→ Selanjutnya: {flow.next}</span>
+          )}
+        </div>
+      )}
 
       <p className="mt-3 text-sm leading-relaxed text-ink-600">{request.reason}</p>
 
