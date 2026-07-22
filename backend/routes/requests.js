@@ -6,9 +6,11 @@ const { isAuthenticated, isRole } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const cloudinary = require('../config/cloudinary');
 
+const DEFAULT_SAMPLE_PROOF = 'https://res.cloudinary.com/ghbqwu6e/image/upload/v1784719020/sikelas_proofs/u7g5exzkvzar5y87xdcr.png';
+
 // Helper to upload file buffer to Cloudinary
 async function uploadToCloudinary(file, folder = 'sikelas_proofs') {
-  if (!file) return '';
+  if (!file) return DEFAULT_SAMPLE_PROOF;
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       { folder: `sikelas/${folder}`, resource_type: 'auto' },
