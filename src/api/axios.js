@@ -22,7 +22,7 @@ api.interceptors.response.use(
 )
 
 export const getImageUrl = (url) => {
-  if (!url) return '';
+  if (!url || url === '#' || url === 'null' || url === 'undefined') return '';
   if (url.startsWith('http') || url.startsWith('data:')) return url;
   return `${BASE_URL}${url}`;
 }

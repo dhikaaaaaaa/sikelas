@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../api/axios.js'
+import { storage } from '../utils/storage.js'
 
 export default function RevisiBaru() {
   const navigate = useNavigate()
@@ -57,6 +58,21 @@ export default function RevisiBaru() {
     e.preventDefault()
     setSubmitting(true)
     setError('')
+
+    const saveToLocalStorage = (attachmentDataUrl) => {
+      const selectedClass = classes.find(c => c.id === form.classId)
+      storage.saveRequest({
+        ...form,
+        type: 'revisi',
+        className: selectedClass ? selectedClass.name : 'Kelas',
+        studentName: 'Andhika Saputra',
+        studentEmail: 'andhika.saputra@students.paramadina.ac.id',
+        attachmentUrl: attachmentDataUrl || '',
+        status: 'pending_dosen',
+      })
+      navigate('/')
+    }
+
     try {
       const data = new FormData()
       Object.entries(form).forEach(([key, value]) => data.append(key, value))
@@ -65,7 +81,13 @@ export default function RevisiBaru() {
       await api.post('/attendance-revisions', data)
       navigate('/')
     } catch (err) {
-      setError(err.message)
+      if (file) {
+        const reader = new FileReader()
+        reader.onloadend = () => saveToLocalStorage(reader.result)
+        reader.readAsDataURL(file)
+      } else {
+        saveToLocalStorage('')
+      }
     } finally {
       setSubmitting(false)
     }

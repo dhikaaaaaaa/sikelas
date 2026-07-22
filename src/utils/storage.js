@@ -16,6 +16,8 @@ const DEFAULT_CLASSES = [
   { id: 'cs204', name: 'CS204 — Basis Data', lecturer: 'Najjuan Fariz', lecturerEmail: 'najjuan.fariz@students.paramadina.ac.id', students: 28, studentNims: ['2310512034', '2310512041', '2310512099'] },
 ]
 
+const SAMPLE_PROOF = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNjAwIDQwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2Y4ZmFmYyIvPjZyZWN0IHg9IjMwIiB5PSIzMCIgd2lkdGg9IjU0MCIgaGVpZ2h0PSIzNDAiIHJ4PSIxNiIgZmlsbD0icnhiKDI1NSwyNTUsMjU1KSIgc3Ryb2tlPSIjZTJlOGYwIiBzdHJva2Utd2lkdGg9IjIiLz48Y2lyY2xlIGN4PSIzMDAiIGN5PSIxNTAiIHI9IjQwIiBmaWxsPSIjZTBmMmZlIi8+PHBhdGggZD0iTTMwMCAxMTAgTDMxNSAxNTAgTDM1MCAxNTAgTDMyMCAxNzAgTDMzNSAyMTAgTDMwMCAxODUgTDI2NSAyMTAgTDI4MCAxNzAgTDI1MCAxNTAgTDI4NSAxNTAgWiIgZmlsbD0iIzAyODRjNzUiLz48dGV4dCB4PSIzMDAiIHk9IjI2MCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMWUyOTNiIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5CdWt0aSBMYW1waXJhbiBUZXJ2ZXJpZmlrYXNpPC90ZXh0Pjx0ZXh0IHg9IzMwMCIgeT0iMjkwIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY0NzQ4YiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U0lLRUxBUyBBa2FkZW1payBQYXJhbWFkaW5hPC90ZXh0Pjwvc3ZnPg=='
+
 const DEFAULT_REQUESTS = [
   {
     id: 'r1',
@@ -26,8 +28,8 @@ const DEFAULT_REQUESTS = [
     studentEmail: 'mahasiswa@gmail.com',
     sessionDate: '2026-07-02',
     reason: 'Mengikuti lomba debat tingkat nasional yang diwakilkan oleh kampus.',
-    attachmentUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=600&auto=format&fit=crop',
-    status: 'pending',
+    attachmentUrl: SAMPLE_PROOF,
+    status: 'pending_admin',
   },
   {
     id: 'r2',
@@ -38,7 +40,7 @@ const DEFAULT_REQUESTS = [
     studentEmail: 'mahasiswa@gmail.com',
     sessionDate: '2026-06-20',
     reason: 'Sistem mencatat alpa, padahal sudah presensi QR tapi sinyal lambat.',
-    attachmentUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop',
+    attachmentUrl: SAMPLE_PROOF,
     status: 'approved',
   },
   {
@@ -50,7 +52,7 @@ const DEFAULT_REQUESTS = [
     studentEmail: 'rangga@kampus.ac.id',
     sessionDate: '2026-06-18',
     reason: 'Sakit demam, surat dokter terlampir.',
-    attachmentUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=600&auto=format&fit=crop',
+    attachmentUrl: SAMPLE_PROOF,
     status: 'rejected',
   },
   {
@@ -62,7 +64,7 @@ const DEFAULT_REQUESTS = [
     studentEmail: 'dimas@kampus.ac.id',
     sessionDate: '2026-06-15',
     reason: 'Mahasiswa keberatan dengan keputusan dosen, mengajukan eskalasi.',
-    attachmentUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop',
+    attachmentUrl: SAMPLE_PROOF,
     status: 'escalated',
   },
   {
@@ -74,8 +76,8 @@ const DEFAULT_REQUESTS = [
     studentEmail: 'andhika.saputra@students.paramadina.ac.id',
     sessionDate: '2026-07-04',
     reason: 'Ada urusan keluarga penting di luar kota.',
-    attachmentUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=600&auto=format&fit=crop',
-    status: 'pending',
+    attachmentUrl: SAMPLE_PROOF,
+    status: 'pending_admin',
   },
   {
     id: 'r6',
@@ -86,7 +88,7 @@ const DEFAULT_REQUESTS = [
     studentEmail: 'andhika.saputra@students.paramadina.ac.id',
     sessionDate: '2026-06-22',
     reason: 'Terlambat melakukan presensi QR karena kendala jaringan wifi kampus.',
-    attachmentUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop',
+    attachmentUrl: SAMPLE_PROOF,
     status: 'approved',
   },
 ]
@@ -100,7 +102,7 @@ const BASE_ATTENDANCE = {
 }
 
 function initData() {
-  const resetKey = 'sikelas_v5_reset';
+  const resetKey = 'sikelas_v6_base64_proofs';
   if (!localStorage.getItem(resetKey)) {
     localStorage.removeItem('sikelas_users')
     localStorage.removeItem('sikelas_classes')
