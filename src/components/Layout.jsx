@@ -34,7 +34,7 @@ export default function Layout({ children }) {
             <img 
               src={logoParamadina} 
               alt="Logo Paramadina" 
-              className="h-10 w-auto object-contain rounded-md bg-white/10 p-1"
+              className="h-10 w-auto object-contain rounded-lg bg-white p-1.5 shadow-sm"
             />
             <div>
               <p className="font-display text-base leading-tight text-white font-semibold">SIKELAS</p>
