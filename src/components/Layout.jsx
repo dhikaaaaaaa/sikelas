@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import NotificationBell from './NotificationBell.jsx'
 
 const NAV_BY_ROLE = {
   mahasiswa: [
@@ -73,6 +74,26 @@ export default function Layout({ children }) {
 
       {/* Area Konten Utama */}
       <div className="flex-1 flex flex-col bg-ink-50">
+        {/* Top Header Bar dengan Notification Bell */}
+        <header className="flex items-center justify-between border-b border-ink-200/70 bg-white px-8 py-3.5 shadow-xs">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+            <p className="text-xs font-medium text-ink-500">
+              Sistem Perizinan Akademik Online
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <div className="h-4 w-px bg-ink-200"></div>
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 font-display text-xs font-bold text-amber-800">
+                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              <span className="text-xs font-semibold text-ink-800">{user?.name}</span>
+            </div>
+          </div>
+        </header>
+
         {/* Konten Halaman */}
         <main className="flex-1 px-10 py-8 overflow-y-auto">{children}</main>
       </div>

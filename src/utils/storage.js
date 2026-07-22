@@ -157,12 +157,83 @@ export const storage = {
     return newReq;
   },
 
-  updateRequestStatus(id, status) {
+  updateRequestStatus(id, status, actorName = 'Admin/Dosen') {
     const requests = this.getRequests()
+    const target = requests.find(r => r.id === id)
     const updated = requests.map(r => r.id === id ? { ...r, status } : r)
     localStorage.setItem('sikelas_requests', JSON.stringify(updated))
     this.updateRecapFromRequests()
+
+    // Buat notifikasi otomatis untuk mahasiswa
+    if (target && target.studentEmail) {
+      const reqTypeName = target.type === 'izin' ? 'Izin Kelas' : 'Revisi Kehadiran';
+      let title = '';
+      let message = '';
+      let type = 'info';
+
+      if (status.includes('rejected')) {
+        type = 'rejected';
+        title = `Pengajuan ${reqTypeName} Ditolak`;
+        message = `Pengajuan ${reqTypeName} Anda untuk kelas ${target.className} (tanggal ${target.sessionDate}) telah DITOLAK oleh ${actorName}.`;
+      } else if (status === 'approved') {
+        type = 'approved';
+        title = `Pengajuan ${reqTypeName} Disetujui!`;
+        message = `Pengajuan ${reqTypeName} Anda untuk kelas ${target.className} (tanggal ${target.sessionDate}) telah DISETUJUI. Rekap kehadiran Anda telah diperbarui.`;
+      } else if (status === 'pending_dosen') {
+        type = 'info';
+        title = `Pengajuan ${reqTypeName} Lanjut ke Dosen`;
+        message = `Pengajuan ${reqTypeName} Anda untuk kelas ${target.className} telah disetujui Admin/FIR dan diteruskan ke Dosen.`;
+      } else if (status === 'pending_admin') {
+        type = 'info';
+        title = `Pengajuan ${reqTypeName} Lanjut ke Admin/FIR`;
+        message = `Pengajuan ${reqTypeName} Anda untuk kelas ${target.className} telah disetujui Dosen dan diteruskan ke Admin/FIR.`;
+      }
+
+      if (title && message) {
+        this.addNotification({
+          userEmail: target.studentEmail,
+          title,
+          message,
+          type,
+          requestId: target.id,
+        })
+      }
+    }
+
     return updated.find(r => r.id === id)
+  },
+
+  // Notifications API
+  getNotifications(userEmail) {
+    initData()
+    const all = JSON.parse(localStorage.getItem('sikelas_notifications')) || []
+    if (!userEmail) return all;
+    return all.filter(n => n.userEmail === userEmail)
+  },
+
+  addNotification(notif) {
+    const all = this.getNotifications()
+    const newNotif = {
+      id: 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      ...notif,
+    }
+    all.unshift(newNotif)
+    localStorage.setItem('sikelas_notifications', JSON.stringify(all))
+    return newNotif
+  },
+
+  markNotificationRead(id) {
+    const all = this.getNotifications()
+    const updated = all.map(n => n.id === id ? { ...n, isRead: true } : n)
+    localStorage.setItem('sikelas_notifications', JSON.stringify(updated))
+  },
+
+  markAllNotificationsRead(userEmail) {
+    const all = this.getNotifications()
+    const updated = all.map(n => (!userEmail || n.userEmail === userEmail) ? { ...n, isRead: true } : n)
+    localStorage.setItem('sikelas_notifications', JSON.stringify(updated))
   },
 
   // Users API

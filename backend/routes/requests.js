@@ -2,6 +2,7 @@ const router = require('express').Router();
 const Request = require('../models/Request');
 const Class = require('../models/Class');
 const Attendance = require('../models/Attendance');
+const Notification = require('../models/Notification');
 const { isAuthenticated, isRole } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const cloudinary = require('../config/cloudinary');
@@ -145,6 +146,47 @@ router.get('/requests/all', isAuthenticated, isRole('dosen', 'admin'), async (re
   }
 });
 
+// Helper: Buat Notifikasi untuk Mahasiswa saat status pengajuan berubah
+async function createNotificationForRequest(request, newStatus, actorName) {
+  try {
+    let title = '';
+    let message = '';
+    let type = 'info';
+
+    const reqTypeName = request.type === 'izin' ? 'Izin Kelas' : 'Revisi Kehadiran';
+
+    if (newStatus.includes('rejected')) {
+      type = 'rejected';
+      title = `Pengajuan ${reqTypeName} Ditolak`;
+      message = `Pengajuan ${reqTypeName} Anda untuk kelas ${request.className} (tanggal ${request.sessionDate}) telah DITOLAK oleh ${actorName}.`;
+    } else if (newStatus === 'approved') {
+      type = 'approved';
+      title = `Pengajuan ${reqTypeName} Disetujui!`;
+      message = `Pengajuan ${reqTypeName} Anda untuk kelas ${request.className} (tanggal ${request.sessionDate}) telah DISETUJUI. Rekap kehadiran Anda telah diperbarui.`;
+    } else if (newStatus === 'pending_dosen') {
+      type = 'info';
+      title = `Pengajuan ${reqTypeName} Lanjut ke Dosen`;
+      message = `Pengajuan ${reqTypeName} Anda untuk kelas ${request.className} telah disetujui Admin/FIR dan diteruskan ke Dosen Pengampu.`;
+    } else if (newStatus === 'pending_admin') {
+      type = 'info';
+      title = `Pengajuan ${reqTypeName} Lanjut ke Admin/FIR`;
+      message = `Pengajuan ${reqTypeName} Anda untuk kelas ${request.className} telah disetujui Dosen dan diteruskan ke Admin/FIR.`;
+    }
+
+    if (title && message) {
+      await Notification.create({
+        user: request.mahasiswa,
+        requestId: request._id,
+        title,
+        message,
+        type,
+      });
+    }
+  } catch (err) {
+    console.error('Error creating notification:', err.message);
+  }
+}
+
 // ─── POST /api/requests/:id/decision — Dosen approve/reject ───
 router.post('/requests/:id/decision', isAuthenticated, isRole('dosen'), async (req, res) => {
   try {
@@ -167,6 +209,9 @@ router.post('/requests/:id/decision', isAuthenticated, isRole('dosen'), async (r
 
     request.status = newStatus;
     await request.save();
+
+    // Buat notifikasi untuk mahasiswa
+    await createNotificationForRequest(request, newStatus, `Dosen (${req.user.name})`);
 
     // Jika status final approved (izin disetujui dosen), update kehadiran
     if (newStatus === 'approved') {
@@ -206,6 +251,9 @@ router.post('/requests/:id/admin-decision', isAuthenticated, isRole('admin'), as
 
     request.status = newStatus;
     await request.save();
+
+    // Buat notifikasi untuk mahasiswa
+    await createNotificationForRequest(request, newStatus, 'Admin/FIR');
 
     // Jika status final approved, update kehadiran
     if (newStatus === 'approved') {
