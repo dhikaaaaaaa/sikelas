@@ -101,14 +101,54 @@ const BASE_ATTENDANCE = {
   '2310512099': { name: 'Andhika Saputra', nim: '2310512099', hadir: 11, izin: 1, sakit: 0, alpa: 2 },
 }
 
+const DEFAULT_NOTIFICATIONS = [
+  {
+    id: 'n1',
+    userEmail: 'andhika.saputra@students.paramadina.ac.id',
+    title: 'Pengajuan Izin Kelas Disetujui!',
+    message: 'Pengajuan Izin Kelas CS101 - Struktur Data Anda telah DISETUJUI oleh Admin & Dosen Pengampu.',
+    type: 'approved',
+    isRead: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+  },
+  {
+    id: 'n2',
+    userEmail: 'andhika.saputra@students.paramadina.ac.id',
+    title: 'Pengajuan Revisi Kehadiran Ditolak',
+    message: 'Pengajuan Revisi Kehadiran Anda untuk kelas CS204 - Basis Data DITOLAK oleh Dosen (Alasan: Tidak Melampirkan Bukti Presensi QR). Anda dapat melakukan Banding.',
+    type: 'rejected',
+    isRead: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+  },
+  {
+    id: 'n3',
+    userEmail: 'fadhil.husein@students.paramadina.ac.id',
+    title: 'Pengajuan Izin Kelas Baru',
+    message: 'Mahasiswa (andhika presha saputra) mengajukan izin kelas CS204 - Basis Data. Perlu verifikasi Admin/FIR.',
+    type: 'info',
+    isRead: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+  },
+  {
+    id: 'n4',
+    userEmail: 'najjuan.fariz@students.paramadina.ac.id',
+    title: 'Pengajuan Revisi Kehadiran Baru',
+    message: 'Mahasiswa (Naila Putri) mengajukan revisi kehadiran untuk kelas CS204 - Basis Data. Perlu verifikasi Dosen Pengampu.',
+    type: 'info',
+    isRead: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
+  }
+];
+
 function initData() {
   const currentVer = localStorage.getItem('sikelas_version');
-  if (!currentVer || currentVer !== 'v2') {
+  if (!currentVer || currentVer !== 'v3') {
     localStorage.setItem('sikelas_users', JSON.stringify(DEFAULT_USERS))
     localStorage.setItem('sikelas_classes', JSON.stringify(DEFAULT_CLASSES))
     localStorage.setItem('sikelas_requests', JSON.stringify(DEFAULT_REQUESTS))
     localStorage.setItem('sikelas_attendance', JSON.stringify(BASE_ATTENDANCE))
-    localStorage.setItem('sikelas_version', 'v2')
+    localStorage.setItem('sikelas_notifications', JSON.stringify(DEFAULT_NOTIFICATIONS))
+    localStorage.setItem('sikelas_version', 'v3')
   }
 }
 
