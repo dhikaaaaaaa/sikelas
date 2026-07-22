@@ -98,21 +98,21 @@ export default function Profil() {
       {/* Kartu Profil Utama */}
       <div className="bg-white rounded-2xl border border-ink-100 shadow-xs overflow-hidden">
         {/* Banner Atas */}
-        <div className="h-28 bg-gradient-to-r from-ink-800 via-ink-700 to-amber-700 p-6 flex items-end">
-          <span className={`px-3 py-1 text-xs font-semibold rounded-full border shadow-xs ${roleColors[user?.role] || 'bg-white text-ink-800'}`}>
+        <div className="h-28 bg-gradient-to-r from-ink-900 via-ink-800 to-amber-700 p-6 flex justify-end items-start">
+          <span className={`px-3.5 py-1 text-xs font-semibold rounded-full border shadow-xs ${roleColors[user?.role] || 'bg-white text-ink-800'}`}>
             {roleLabels[user?.role] || user?.role}
           </span>
         </div>
 
         <div className="px-6 pb-6 pt-0 relative">
           {/* Avatar & Identitas Singkat */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between -mt-12 mb-6 gap-4">
-            <div className="flex items-end gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between -mt-10 mb-6 gap-4">
+            <div className="flex items-center gap-4">
               <div className="h-20 w-20 rounded-2xl bg-amber-400 border-4 border-white shadow-md flex items-center justify-center font-display text-2xl font-bold text-ink-900 shrink-0">
                 {user?.name?.charAt(0)?.toUpperCase() || 'U'}
               </div>
-              <div>
-                <h2 className="font-display text-xl font-bold text-ink-900">{user?.name}</h2>
+              <div className="pt-10 sm:pt-8">
+                <h2 className="font-display text-xl font-bold text-ink-900 leading-tight">{user?.name}</h2>
                 <p className="text-xs text-ink-500 font-medium">{user?.email}</p>
               </div>
             </div>
