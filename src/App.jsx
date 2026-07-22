@@ -10,6 +10,7 @@ import RekapKehadiran from './pages/RekapKehadiran.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import KelolaPengguna from './pages/KelolaPengguna.jsx'
 import KelolaKelas from './pages/KelolaKelas.jsx'
+import Profil from './pages/Profil.jsx'
 
 function DashboardByRole() {
   const { user } = useAuth()
@@ -33,6 +34,7 @@ export default function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<DashboardByRole />} />
+        <Route path="/profil" element={<Profil />} />
 
         {user.role === 'mahasiswa' && (
           <>

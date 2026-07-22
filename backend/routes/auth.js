@@ -92,17 +92,45 @@ router.get('/me', (req, res) => {
   return res.status(401).json({ message: 'Belum login' });
 });
 
-// POST /api/auth/logout — Logout user
-router.post('/logout', (req, res) => {
-  req.logout((err) => {
-    if (err) {
-      return res.status(500).json({ message: 'Gagal logout' });
+// PUT /api/auth/profile — Update profile user yang sedang login
+router.put('/profile', async (req, res) => {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Belum login' });
+  }
+
+  try {
+    const { name, nim, nip, semester, jurusan } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'Pengguna tidak ditemukan.' });
     }
-    req.session.destroy(() => {
-      res.clearCookie('connect.sid');
-      res.json({ message: 'Logout berhasil' });
+
+    if (name) user.name = name;
+    if (nim !== undefined) user.nim = nim;
+    if (nip !== undefined) user.nip = nip;
+    if (semester !== undefined) user.semester = parseInt(semester) || user.semester;
+    if (jurusan !== undefined) user.jurusan = jurusan;
+
+    await user.save();
+
+    res.json({
+      message: 'Profil berhasil diperbarui',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        nim: user.nim,
+        nip: user.nip,
+        semester: user.semester,
+        jurusan: user.jurusan,
+      },
     });
-  });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 module.exports = router;

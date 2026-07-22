@@ -8,16 +8,19 @@ const NAV_BY_ROLE = {
     { to: '/', label: 'Ringkasan' },
     { to: '/izin/baru', label: 'Ajukan Izin' },
     { to: '/revisi/baru', label: 'Ajukan Revisi Kehadiran' },
+    { to: '/profil', label: 'Profil Saya' },
   ],
   dosen: [
     { to: '/', label: 'Pengajuan Masuk' },
     { to: '/rekap', label: 'Rekap Kehadiran' },
+    { to: '/profil', label: 'Profil Saya' },
   ],
   admin: [
     { to: '/', label: 'Dashboard Admin (FIR)' },
     { to: '/rekap', label: 'Rekap Kehadiran' },
     { to: '/pengguna', label: 'Kelola Pengguna' },
     { to: '/kelas', label: 'Kelola Kelas' },
+    { to: '/profil', label: 'Profil Saya' },
   ],
 }
 
@@ -61,8 +64,10 @@ export default function Layout({ children }) {
         </div>
 
         <div className="border-t border-ink-700 pt-4">
-          <p className="truncate text-sm font-medium text-white">{user?.name}</p>
-          <p className="truncate text-xs text-ink-300 font-sans">{user?.email}</p>
+          <NavLink to="/profil" className="block hover:opacity-80 transition-opacity">
+            <p className="truncate text-sm font-medium text-white">{user?.name}</p>
+            <p className="truncate text-xs text-ink-300 font-sans">{user?.email}</p>
+          </NavLink>
           <span className="mt-2 inline-block rounded-full bg-ink-700 px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold text-amber-300">
             {user?.role}
           </span>
@@ -88,12 +93,12 @@ export default function Layout({ children }) {
           <div className="flex items-center gap-4">
             <NotificationBell />
             <div className="h-4 w-px bg-ink-200"></div>
-            <div className="flex items-center gap-2">
+            <NavLink to="/profil" className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 font-display text-xs font-bold text-amber-800">
                 {user?.name?.charAt(0)?.toUpperCase() || 'U'}
               </div>
               <span className="text-xs font-semibold text-ink-800">{user?.name}</span>
-            </div>
+            </NavLink>
           </div>
         </header>
 

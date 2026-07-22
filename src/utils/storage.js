@@ -289,6 +289,13 @@ export const storage = {
     return updated.find(u => u.id === id)
   },
 
+  updateProfile(email, data) {
+    const users = this.getUsers()
+    const updated = users.map(u => u.email === email ? { ...u, ...data } : u)
+    localStorage.setItem('sikelas_users', JSON.stringify(updated))
+    return updated.find(u => u.email === email)
+  },
+
   addUser(user) {
     const users = this.getUsers()
     const newUser = {
