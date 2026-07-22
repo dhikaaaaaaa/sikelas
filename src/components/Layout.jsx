@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import NotificationBell from './NotificationBell.jsx'
+import logoParamadina from '../assets/Logo_Universitas_Paramadna.png'
 
 const NAV_BY_ROLE = {
   mahasiswa: [
@@ -29,10 +30,12 @@ export default function Layout({ children }) {
       {/* Sidebar Navigasi */}
       <aside className="flex w-64 flex-col justify-between bg-ink-800 px-5 py-6 text-ink-100 shrink-0">
         <div>
-          <div className="mb-8 flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400 font-display text-lg font-semibold text-ink-900">
-              S
-            </div>
+          <div className="mb-8 flex items-center gap-3">
+            <img 
+              src={logoParamadina} 
+              alt="Logo Paramadina" 
+              className="h-10 w-auto object-contain rounded-md bg-white/10 p-1"
+            />
             <div>
               <p className="font-display text-base leading-tight text-white font-semibold">SIKELAS</p>
               <p className="text-[10px] uppercase tracking-wider text-ink-300">Izin & Kehadiran</p>
