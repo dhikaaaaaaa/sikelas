@@ -132,15 +132,37 @@ export const storage = {
   // Requests API
   getRequests() {
     initData()
-    return JSON.parse(localStorage.getItem('sikelas_requests'))
+    const raw = JSON.parse(localStorage.getItem('sikelas_requests')) || []
+    let modified = false
+    const sanitized = raw.map(r => {
+      let updated = { ...r }
+      // Update old pending status to new multi-step status
+      if (updated.status === 'pending') {
+        updated.status = updated.type === 'revisi' ? 'pending_dosen' : 'pending_admin'
+        modified = true
+      }
+      // Update broken /uploads/, empty, or # image paths to valid Base64 sample proof
+      if (!updated.attachmentUrl || updated.attachmentUrl.startsWith('/uploads/') || updated.attachmentUrl === '#') {
+        updated.attachmentUrl = SAMPLE_PROOF
+        modified = true
+      }
+      return updated
+    })
+
+    if (modified) {
+      localStorage.setItem('sikelas_requests', JSON.stringify(sanitized))
+    }
+    return sanitized
   },
 
   saveRequest(request) {
     const requests = this.getRequests()
+    const defaultStatus = request.type === 'revisi' ? 'pending_dosen' : 'pending_admin'
     const newReq = {
       id: 'req_' + Date.now(),
-      status: 'pending',
+      status: defaultStatus,
       ...request,
+      attachmentUrl: request.attachmentUrl || SAMPLE_PROOF,
     }
     requests.unshift(newReq)
     localStorage.setItem('sikelas_requests', JSON.stringify(requests))
