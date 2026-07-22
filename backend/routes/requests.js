@@ -38,10 +38,9 @@ router.post(
         return res.status(404).json({ message: 'Kelas tidak ditemukan.' });
       }
 
-      let attachmentUrl = '';
-      if (req.file) {
-        attachmentUrl = await uploadToCloudinary(req.file, 'permissions');
-      }
+      const attachmentUrl = req.file
+        ? await uploadToCloudinary(req.file, 'permissions')
+        : DEFAULT_SAMPLE_PROOF;
 
       const request = await Request.create({
         type: 'izin',
@@ -80,10 +79,9 @@ router.post(
         return res.status(404).json({ message: 'Kelas tidak ditemukan.' });
       }
 
-      let attachmentUrl = '';
-      if (req.file) {
-        attachmentUrl = await uploadToCloudinary(req.file, 'revisions');
-      }
+      const attachmentUrl = req.file
+        ? await uploadToCloudinary(req.file, 'revisions')
+        : DEFAULT_SAMPLE_PROOF;
 
       const request = await Request.create({
         type: 'revisi',
