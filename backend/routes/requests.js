@@ -4,6 +4,22 @@ const Class = require('../models/Class');
 const Attendance = require('../models/Attendance');
 const { isAuthenticated, isRole } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const cloudinary = require('../config/cloudinary');
+
+// Helper to upload file buffer to Cloudinary
+async function uploadToCloudinary(file, folder = 'sikelas_proofs') {
+  if (!file) return '';
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: `sikelas/${folder}`, resource_type: 'auto' },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url);
+      }
+    );
+    uploadStream.end(file.buffer);
+  });
+}
 
 // ─── POST /api/permissions — Mahasiswa ajukan izin kelas ───
 // Alur: Mahasiswa → Admin/FIR (pending_admin) → Dosen (pending_dosen) → Selesai
@@ -20,9 +36,10 @@ router.post(
         return res.status(404).json({ message: 'Kelas tidak ditemukan.' });
       }
 
-      const attachmentUrl = req.file
-        ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
-        : '';
+      let attachmentUrl = '';
+      if (req.file) {
+        attachmentUrl = await uploadToCloudinary(req.file, 'permissions');
+      }
 
       const request = await Request.create({
         type: 'izin',
@@ -61,9 +78,10 @@ router.post(
         return res.status(404).json({ message: 'Kelas tidak ditemukan.' });
       }
 
-      const attachmentUrl = req.file
-        ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
-        : '';
+      let attachmentUrl = '';
+      if (req.file) {
+        attachmentUrl = await uploadToCloudinary(req.file, 'revisions');
+      }
 
       const request = await Request.create({
         type: 'revisi',
