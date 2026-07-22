@@ -102,26 +102,13 @@ const BASE_ATTENDANCE = {
 }
 
 function initData() {
-  const resetKey = 'sikelas_v6_base64_proofs';
-  if (!localStorage.getItem(resetKey)) {
-    localStorage.removeItem('sikelas_users')
-    localStorage.removeItem('sikelas_classes')
-    localStorage.removeItem('sikelas_requests')
-    localStorage.removeItem('sikelas_attendance')
-    localStorage.setItem(resetKey, 'true')
-  }
-
-  if (!localStorage.getItem('sikelas_users')) {
+  const currentVer = localStorage.getItem('sikelas_version');
+  if (!currentVer || currentVer !== 'v2') {
     localStorage.setItem('sikelas_users', JSON.stringify(DEFAULT_USERS))
-  }
-  if (!localStorage.getItem('sikelas_classes')) {
     localStorage.setItem('sikelas_classes', JSON.stringify(DEFAULT_CLASSES))
-  }
-  if (!localStorage.getItem('sikelas_requests')) {
     localStorage.setItem('sikelas_requests', JSON.stringify(DEFAULT_REQUESTS))
-  }
-  if (!localStorage.getItem('sikelas_attendance')) {
     localStorage.setItem('sikelas_attendance', JSON.stringify(BASE_ATTENDANCE))
+    localStorage.setItem('sikelas_version', 'v2')
   }
 }
 
