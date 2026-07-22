@@ -4,22 +4,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-const VALID_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
-  <rect width="100%" height="100%" fill="#f8fafc"/>
-  <rect x="30" y="30" width="540" height="340" rx="16" fill="rgb(255,255,255)" stroke="#e2e8f0" stroke-width="2"/>
-  <circle cx="300" cy="130" r="50" fill="#dbeafe"/>
-  <path d="M280 115 L300 95 L320 115 L312 115 L312 140 L288 140 L288 115 Z" fill="#3b82f6"/>
-  <rect x="280" y="148" width="40" height="4" rx="2" fill="#93c5fd"/>
-  <rect x="160" y="200" width="280" height="12" rx="4" fill="#e2e8f0"/>
-  <rect x="190" y="224" width="220" height="10" rx="4" fill="#f1f5f9"/>
-  <rect x="210" y="246" width="180" height="10" rx="4" fill="#f1f5f9"/>
-  <text x="300" y="300" font-family="sans-serif" font-size="18" font-weight="bold" fill="#1e293b" text-anchor="middle">Bukti Lampiran Terverifikasi</text>
-  <text x="300" y="325" font-family="sans-serif" font-size="13" fill="#64748b" text-anchor="middle">SIKELAS Akademik Paramadina</text>
-  <circle cx="300" cy="365" r="12" fill="#22c55e"/>
-  <path d="M294 365 L298 369 L306 361" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-
-const VALID_DATA_URL = 'data:image/svg+xml;base64,' + Buffer.from(VALID_SVG).toString('base64');
+const VALID_DATA_URL = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNjAwIDQwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2Y4ZmFmYyIvPjxyZWN0IHg9IjMwIiB5PSIzMCIgd2lkdGg9IjU0MCIgaGVpZ2h0PSIzNDAiIHJ4PSIxNiIgZmlsbD0icmdiKDI1NSwyNTUsMjU1KSIgc3Ryb2tlPSIjZTJlOGYwIiBzdHJva2Utd2lkdGg9IjIiLz48Y2lyY2xlIGN4PSIzMDAiIGN5PSIxMzAiIHI9IjUwIiBmaWxsPSIjZGJlYWZlIi8+PHBhdGggZD0iTTI4MCAxMTUgTDMwMCA5NSBMMzIwIDExNSBMMzEyIDExNSBMMzEyIDE0MCBMMjg4IDE0MCBMMjg4IDExNSBaIiBmaWxsPSIjM2I4MmY2Ii8+PHJlY3QgeD0iMjgwIiB5PSIxNDgiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0IiByeD0iMiIgZmlsbD0iIzkzYzVmZCIvPjxyZWN0IHg9IjE2MCIgeT0iMjAwIiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjEyIiByeD0iNCIgZmlsbD0iI2UyZThmMCIvPjxyZWN0IHg9IjE5MCIgeT0iMjI0IiB3aWR0aD0iMjIwIiBoZWlnaHQ9IjEwIiByeD0iNCIgZmlsbD0iI2YxZjVmOSIvPjxyZWN0IHg9IjIxMCIgeT0iMjQ2IiB3aWR0aD0iMTgwIiBoZWlnaHQ9IjEwIiByeD0iNCIgZmlsbD0iI2YxZjVmOSIvPjx0ZXh0IHg9IjMwMCIgeT0iMzAwIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMxZTI5M2IiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJ1a3RpIExhbXBpcmFuIFRlcnZlcmlmaWthc2k8L3RleHQ+PHRleHQgeD0iMzAwIiB5PSIzMjUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjEzIiBmaWxsPSIjNjQ3NDhiIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TSUtFTEFTIEFrYWRlbWlrIFBhcmFtYWRpbmE8L3RleHQ+PGNpcmNsZSBjeD0iMzAwIiBjeT0iMzY1IiByPSIxMiIgZmlsbD0iIzIyYzU1ZSIvPjxwYXRoIGQ9Ik0yOTQgMzY1IEwyOTggMzY5IEwzMDYgMzYxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+';
 
 async function fixSvgInDb() {
   await mongoose.connect(process.env.MONGODB_URI);
