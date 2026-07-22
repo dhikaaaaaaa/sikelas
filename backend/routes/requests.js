@@ -1,8 +1,8 @@
-const router = require('express').Router();
 const Request = require('../models/Request');
 const Class = require('../models/Class');
 const Attendance = require('../models/Attendance');
 const Notification = require('../models/Notification');
+const User = require('../models/User');
 const { isAuthenticated, isRole } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const cloudinary = require('../config/cloudinary');
@@ -58,6 +58,14 @@ router.post(
 
       const response = request.toObject();
       response.id = response._id;
+
+      // Notifikasi ke Admin/FIR bahwa ada izin baru
+      await notifyAdmins({
+        title: 'Pengajuan Izin Kelas Baru',
+        message: `${req.user.name} mengajukan izin untuk kelas ${classData.name} (tanggal ${sessionDate}).`,
+        requestId: request._id,
+      });
+
       res.status(201).json({ request: response });
     } catch (err) {
       res.status(500).json({ message: err.message });
@@ -100,6 +108,15 @@ router.post(
 
       const revResponse = request.toObject();
       revResponse.id = revResponse._id;
+
+      // Notifikasi ke Dosen bahwa ada revisi kehadiran baru
+      await notifyLecturer({
+        classId: classData._id,
+        title: 'Pengajuan Revisi Kehadiran Baru',
+        message: `${req.user.name} mengajukan revisi kehadiran untuk kelas ${classData.name} (tanggal ${sessionDate}).`,
+        requestId: request._id,
+      });
+
       res.status(201).json({ request: revResponse });
     } catch (err) {
       res.status(500).json({ message: err.message });
@@ -145,6 +162,44 @@ router.get('/requests/all', isAuthenticated, isRole('dosen', 'admin'), async (re
     res.status(500).json({ message: err.message });
   }
 });
+
+// Helper: Kirim notifikasi ke semua Admin
+async function notifyAdmins({ title, message, requestId }) {
+  try {
+    const admins = await User.find({ role: 'admin' });
+    for (const admin of admins) {
+      await Notification.create({
+        user: admin._id,
+        requestId,
+        title,
+        message,
+        type: 'info',
+      });
+    }
+  } catch (err) {
+    console.error('Error notifying admins:', err.message);
+  }
+}
+
+// Helper: Kirim notifikasi ke Dosen Pengampu Kelas
+async function notifyLecturer({ classId, title, message, requestId }) {
+  try {
+    const classData = await Class.findById(classId);
+    if (!classData || !classData.lecturerEmail) return;
+    const lecturer = await User.findOne({ email: classData.lecturerEmail, role: 'dosen' });
+    if (lecturer) {
+      await Notification.create({
+        user: lecturer._id,
+        requestId,
+        title,
+        message,
+        type: 'info',
+      });
+    }
+  } catch (err) {
+    console.error('Error notifying lecturer:', err.message);
+  }
+}
 
 // Helper: Buat Notifikasi untuk Mahasiswa saat status pengajuan berubah
 async function createNotificationForRequest(request, newStatus, actorName) {
@@ -213,6 +268,15 @@ router.post('/requests/:id/decision', isAuthenticated, isRole('dosen'), async (r
     // Buat notifikasi untuk mahasiswa
     await createNotificationForRequest(request, newStatus, `Dosen (${req.user.name})`);
 
+    // Jika revisi disetujui Dosen dan lanjut ke Admin, kirim notifikasi ke Admin/FIR
+    if (newStatus === 'pending_admin') {
+      await notifyAdmins({
+        title: 'Revisi Kehadiran Perlu Persetujuan Admin',
+        message: `Dosen (${req.user.name}) menyetujui revisi kehadiran ${request.studentName} (${request.className}). Perlu persetujuan final Admin/FIR.`,
+        requestId: request._id,
+      });
+    }
+
     // Jika status final approved (izin disetujui dosen), update kehadiran
     if (newStatus === 'approved') {
       await updateAttendance(request);
@@ -255,6 +319,16 @@ router.post('/requests/:id/admin-decision', isAuthenticated, isRole('admin'), as
     // Buat notifikasi untuk mahasiswa
     await createNotificationForRequest(request, newStatus, 'Admin/FIR');
 
+    // Jika izin disetujui Admin dan lanjut ke Dosen, kirim notifikasi ke Dosen Pengampu
+    if (newStatus === 'pending_dosen') {
+      await notifyLecturer({
+        classId: request.classId,
+        title: 'Izin Kelas Perlu Verifikasi Dosen',
+        message: `Admin/FIR menyetujui izin kelas ${request.studentName} (${request.className}). Perlu verifikasi akhir Dosen.`,
+        requestId: request._id,
+      });
+    }
+
     // Jika status final approved, update kehadiran
     if (newStatus === 'approved') {
       await updateAttendance(request);
@@ -282,6 +356,13 @@ router.post('/requests/:id/escalate', isAuthenticated, isRole('mahasiswa'), asyn
 
     request.status = 'escalated';
     await request.save();
+
+    // Notifikasi ke Admin/FIR bahwa ada pengajuan banding baru
+    await notifyAdmins({
+      title: 'Pengajuan Banding Baru',
+      message: `${req.user.name} mengajukan banding untuk kelas ${request.className}. Perlu peninjauan Admin/FIR.`,
+      requestId: request._id,
+    });
 
     res.json({ request: mapRequest(request) });
   } catch (err) {
